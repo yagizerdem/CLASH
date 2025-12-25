@@ -14,14 +14,38 @@ void setDefaultEnv(char* envp[]) {
 int main(int argc, char* argv[], char* envp[]) {
     setDefaultEnv(envp);
 
-    char* argv_[] = {"cat", NULL};
-    char* envp_[] = {
-        "name=yagiz",
-        "city=izmir",
-        NULL
+
+    Pipe pipe;
+
+    // ls
+    Command cmd1;
+    cmd1.rawShellCommand = "ls";
+    cmd1.argv = {
+        const_cast<char*>("ls"),
+        nullptr
     };
 
-    ExecuteProcessResult result  = Spawn::executeProcess(argv_);
+    // grep cpp
+    Command cmd2;
+    cmd2.rawShellCommand = "grep cpp";
+    cmd2.argv = {
+        const_cast<char*>("grep"),
+        const_cast<char*>("cpp"),
+        nullptr
+    };
+
+    // wc -l
+    Command cmd3;
+    cmd3.rawShellCommand = "wc -l";
+    cmd3.argv = {
+        const_cast<char*>("wc"),
+        const_cast<char*>("-l"),
+        nullptr
+    };
+
+    pipe.commands = { cmd1, cmd2, cmd3 };
+
+    ExecuteProcessResult result  = Spawn::executePipe(pipe);
 
     std::cout << result.stdOut << std::endl;
 

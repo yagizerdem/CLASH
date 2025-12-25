@@ -10,7 +10,7 @@ class Command {
 public:
     std::string rawShellCommand;
 
-    char* argv[];
+    std::vector<char*> argv;
 };
 
 #endif //CLASH_COMMAND_H

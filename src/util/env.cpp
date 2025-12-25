@@ -5,6 +5,9 @@
 #include "env.h"
 
 #include <iostream>
+#include <unistd.h>
+#include <linux/limits.h>
+
 #include "stringUtil.h"
 
 Env* Env::instancePtr = nullptr;
@@ -50,3 +53,20 @@ void Env::setEnv(std::string key, std::string value) {
     var.isExported = false;
     this->environment_variables[key] = var;
 }
+
+std::string Env::getCwd() {
+    char buf[PATH_MAX];
+    std::string cwd;
+    if (getcwd(buf, sizeof(buf)) == NULL) {
+        perror("getcwd");
+    } else {
+        cwd = StringUtil::convertToCppStyleString(buf);
+    }
+    return  cwd;
+}
+
+void Env::setCwd(std::string value) {
+    // change process cwd
+    chdir(value.c_str());
+}
+

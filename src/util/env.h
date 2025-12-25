@@ -35,12 +35,16 @@ public:
     }
 
     std::unordered_map<std::string, Variable> environment_variables;
+
     void loadEnvp(char* envp[]);
 
     void setEnv(std::string key, std::string value);
     void unsetEnv(std::string key);
     Variable getEnv(std::string key);
     void exportEnv(std::string key);
+
+    void setCwd(std::string value);
+    std::string getCwd();
 };
 
 

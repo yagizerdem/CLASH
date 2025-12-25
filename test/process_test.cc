@@ -21,7 +21,6 @@ int main(int argc, char* argv[], char* envp[]) {
 }
 
 TEST(SpawnProcessTest, Basic) {
-    Spawn spawn;
-    std::string resolvedPath = spawn.resolveExecutablePath("./Desktop/processTest");
+    std::string resolvedPath = Spawn::resolveExecutablePath("./Desktop/processTest");
     ASSERT_EQ(resolvedPath, "./Desktop/processTest");
 }

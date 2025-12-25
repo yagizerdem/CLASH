@@ -8,9 +8,45 @@
 #include<unistd.h>
 #include "../util/env.h"
 #include <fstream>
+#include <iostream>
+#include <sys/wait.h>
+#include <pthread.h>
+#include <string.h>
+#include <thread>
+
+#include "../util/model/executeProcessResult.h"
 
 
-std::string Spawn::executeProcess(char* argv[]) {
+ExecuteProcessResult Spawn::executeProcess(char* argv[]) {
+    Env* env = Env::getInstance();
+    int size = env->environment_variables.size();
+    char* envp[size + 1];
+    int counter = 0;
+    for (auto i = env->environment_variables.begin(); i != env->environment_variables.end(); i++) {
+        std::string key = i->first;
+        std::string value = i->second.value;
+        std::string env_val  = key.append("=").append(value);
+        envp[counter] = strdup(StringUtil::convertToCString(env_val));
+        counter++;
+    }
+    envp[counter] = NULL;
+
+    return executeProcess(argv, envp);
+
+}
+
+ExecuteProcessResult Spawn::executeProcess(char* argv[], char* envp[]) {
+    const int MSGSIZE = 4096;
+    char outbuf[MSGSIZE];
+    char errbuf[MSGSIZE];
+    int stdOutPipe[2];
+    int stdErrPipe[2];
+    std::string stdOut = "";
+    std::string stdErr = "";
+
+    if (pipe(stdOutPipe) < 0 || pipe(stdErrPipe) < 0)
+        exit(EXIT_FAILURE);
+
     StringUtil string_util;
     std::string programName = string_util.convertToCppStyleString(argv[0]);
 
@@ -23,11 +59,88 @@ std::string Spawn::executeProcess(char* argv[]) {
     if (c_pid == 0) {
         // CHILD
 
+        close(stdOutPipe[0]);
+        close(stdErrPipe[0]);
+        dup2(stdOutPipe[1], STDOUT_FILENO);
+        dup2(stdErrPipe[1], STDERR_FILENO);
+        close(stdOutPipe[1]);
+        close(stdErrPipe[1]);
+
+        std::string executablePath = resolveExecutablePath(
+            StringUtil::convertToCppStyleString(argv[0]));
+
+        if (executablePath.empty()) {
+            std::cerr <<  argv[0] << " executable not found" << std::endl;
+            _exit(127);
+        }
+
+
+        execve(StringUtil::convertToCString(executablePath), argv, envp);
+
+        perror("execve");
+        _exit(126);
+    }
+
+    close(stdOutPipe[1]);
+    close(stdErrPipe[1]);
+
+
+    auto readStdOut = [&stdOutPipe, &outbuf, MSGSIZE, &stdOut]( ) -> void {
+        size_t n;
+        while ((n = read(stdOutPipe[0], outbuf, MSGSIZE)) > 0) {
+            stdOut.append(outbuf, n);
+        }
+        close(stdOutPipe[0]);
+    };
+
+    auto readStdErr = [&stdErrPipe, &errbuf, MSGSIZE, &stdErr]( ) -> void {
+        size_t n;
+        while ((n = read(stdErrPipe[0], errbuf, MSGSIZE)) > 0) {
+            stdErr.append(errbuf, n);
+        }
+        close(stdErrPipe[0]);
+    };
+
+    std::thread stdOutThread(readStdOut);
+    std::thread stdErrThread(readStdErr);
+
+    stdOutThread.join();
+    stdErrThread.join();
+
+    int child_exit_status;
+    waitpid(c_pid, &child_exit_status, 0);
+
+    ExecuteProcessResult result;
+    result.stdOut = stdOut;
+    result.stdErr = stdErr;
+
+    if ( WIFEXITED(child_exit_status) )
+    {
+        int lastExitStatus = WEXITSTATUS(child_exit_status);
+
+        result.exitCode= lastExitStatus;
+        result.signaled = false;
+        result.exitedNormally = true;
+    }
+    else if (WIFSIGNALED(child_exit_status)) {
+        int lastExitStatus = 128 + WTERMSIG(child_exit_status);
+        int sig = WTERMSIG(child_exit_status);
+
+        result.exitCode = lastExitStatus;
+        result.signaled = true;
+        result.signal = sig;
+        result.exitedNormally = false;
+
     }
     else {
+        int lastExitStatus = EXIT_FAILURE; // default fallback
 
+        result.signaled = false;
+        result.exitedNormally = true;
+        result.exitCode = lastExitStatus;
     }
 
+    return result;
 }
 
 std::string Spawn::resolveExecutablePath(std::string programName) {

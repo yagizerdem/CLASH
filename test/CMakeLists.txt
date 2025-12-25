@@ -21,9 +21,17 @@ add_executable(
         process_test.cc
 )
 
+add_executable(
+        expandTest
+        expand_test.cc
+)
 
 target_link_libraries(processTest PUBLIC processLib)
 target_link_libraries(processTest PRIVATE GTest::gtest GTest::gtest_main)
 
+target_link_libraries(expandTest PUBLIC expandLib)
+target_link_libraries(expandTest PRIVATE GTest::gtest GTest::gtest_main)
+
 include(GoogleTest)
 gtest_discover_tests(processTest)
+gtest_discover_tests(expandTest)

@@ -15,7 +15,7 @@ int main(int argc, char* argv[], char* envp[]) {
     setDefaultEnv(envp);
 
 
-    char* argv_[] = {"env", NULL};
+    char* argv_[] = {"cat", NULL};
     char* envp_[] = {
         "name=yagiz",
         "city=izmir",
@@ -27,6 +27,7 @@ int main(int argc, char* argv[], char* envp[]) {
     ExecuteProcessResult result  = Spawn::executeProcess(argv_);
 
     std::cout << result.stdOut << std::endl;
+    std::cout << "hit"<< std::endl;
 
     return 0;
 }

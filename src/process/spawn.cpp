@@ -3,6 +3,8 @@
 //
 
 #include "spawn.h"
+
+#include <fcntl.h>
 #include <string>
 #include "../util/stringUtil.h"
 #include<unistd.h>
@@ -10,9 +12,10 @@
 #include <fstream>
 #include <iostream>
 #include <sys/wait.h>
-#include <pthread.h>
 #include <string.h>
 #include <thread>
+#include <signal.h>
+#include <termios.h>
 
 #include "../util/model/executeProcessResult.h"
 
@@ -36,6 +39,15 @@ ExecuteProcessResult Spawn::executeProcess(char* argv[]) {
 }
 
 ExecuteProcessResult Spawn::executeProcess(char* argv[], char* envp[]) {
+    signal(SIGTTOU, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
+    signal(SIGTSTP, SIG_IGN);
+
+    static struct termios shell_termios;
+
+    tcgetattr(STDIN_FILENO, &shell_termios);
+
+
     const int MSGSIZE = 4096;
     char outbuf[MSGSIZE];
     char errbuf[MSGSIZE];
@@ -59,10 +71,15 @@ ExecuteProcessResult Spawn::executeProcess(char* argv[], char* envp[]) {
     if (c_pid == 0) {
         // CHILD
 
+        // child set own process group
+        setpgid(0, 0);
+
         close(stdOutPipe[0]);
         close(stdErrPipe[0]);
+
         dup2(stdOutPipe[1], STDOUT_FILENO);
         dup2(stdErrPipe[1], STDERR_FILENO);
+
         close(stdOutPipe[1]);
         close(stdErrPipe[1]);
 
@@ -81,10 +98,6 @@ ExecuteProcessResult Spawn::executeProcess(char* argv[], char* envp[]) {
         _exit(126);
     }
 
-    close(stdOutPipe[1]);
-    close(stdErrPipe[1]);
-
-
     auto readStdOut = [&stdOutPipe, &outbuf, MSGSIZE, &stdOut]( ) -> void {
         size_t n;
         while ((n = read(stdOutPipe[0], outbuf, MSGSIZE)) > 0) {
@@ -101,14 +114,29 @@ ExecuteProcessResult Spawn::executeProcess(char* argv[], char* envp[]) {
         close(stdErrPipe[0]);
     };
 
+    setpgid(c_pid, c_pid);
+    tcsetpgrp(STDIN_FILENO, c_pid);
+    close(stdOutPipe[1]);
+    close(stdErrPipe[1]);
+
     std::thread stdOutThread(readStdOut);
     std::thread stdErrThread(readStdErr);
+
+    int child_exit_status;
+    waitpid(c_pid, &child_exit_status, 0);
 
     stdOutThread.join();
     stdErrThread.join();
 
-    int child_exit_status;
-    waitpid(c_pid, &child_exit_status, 0);
+    tcsetpgrp(STDIN_FILENO, getpgrp()); // give termianl contorl to parent again
+    tcsetattr(STDIN_FILENO, TCSANOW, &shell_termios);
+
+    // open stdinput again
+    int tty = open("/dev/tty", O_RDONLY);
+    if (tty >= 0) {
+        dup2(tty, STDIN_FILENO);
+        close(tty);
+    }
 
     ExecuteProcessResult result;
     result.stdOut = stdOut;

@@ -1,16 +1,17 @@
 #include <iostream>
+
+#include "util/env.h"
 #include "util/stringUtil.h"
 
-int main() {
+void setDefaultEnv(char* envp[]) {
+    Env* env = Env::getInstance();
+    env->loadEnvp(envp);
+}
 
-    StringUtil stringutil;
-    std::string input = " yagiz erdem ";
-    std::cout << input << std::endl;
-    stringutil.trim(input);
-    std::cout << input << std::endl;
-
-
-
+int main(int argc, char* argv[], char* envp[]) {
+    setDefaultEnv(envp);
 
     return 0;
 }
+
+

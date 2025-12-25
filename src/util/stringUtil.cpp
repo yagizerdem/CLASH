@@ -51,3 +51,12 @@ std::vector<std::string> StringUtil::split(std::string s, std::string delimiter)
     res.push_back (s.substr (pos_start));
     return res;
 }
+
+
+std::string StringUtil::convertToCppStyleString(const char* c_string) {
+    return c_string ? std::string(c_string) : std::string{};
+}
+
+const char* StringUtil::convertToCString(const std::string& s) {
+    return s.c_str();
+}

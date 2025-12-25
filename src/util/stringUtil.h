@@ -18,6 +18,8 @@ public:
     static std::string &trim(std::string &s);
     static bool isEscapedCharacter(int index, std::string input);
     static std::vector<std::string> split(std::string s, std::string delimiter);
+    static  std::string convertToCppStyleString(const char* c_string);
+    static  const char* convertToCString(const std::string& s);
 };
 
 

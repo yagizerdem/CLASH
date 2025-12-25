@@ -1,4 +1,6 @@
-add_executable(CLASH main.cpp)
+add_executable(CLASH main.cpp
+        util/model/command.h
+        util/model/pipe.h)
 
 
 file(GLOB_RECURSE util CONFIGURE_DEPENDS ./util/*.cpp ./util/*.h)

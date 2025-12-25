@@ -14,15 +14,12 @@ void setDefaultEnv(char* envp[]) {
 int main(int argc, char* argv[], char* envp[]) {
     setDefaultEnv(envp);
 
-
-    char* argv_[] = {"env", NULL};
+    char* argv_[] = {"cat", NULL};
     char* envp_[] = {
         "name=yagiz",
         "city=izmir",
         NULL
     };
-
-
 
     ExecuteProcessResult result  = Spawn::executeProcess(argv_);
 

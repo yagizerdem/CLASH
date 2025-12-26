@@ -5,6 +5,7 @@
 #ifndef CLASH_COMMAND_H
 #define CLASH_COMMAND_H
 #include <string>
+#include <vector>
 
 class Command {
 public:

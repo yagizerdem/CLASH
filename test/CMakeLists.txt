@@ -31,6 +31,11 @@ add_executable(
         glob_test.cc
 )
 
+add_executable(
+        commandSplitterTest
+        command_splitter_test.cc
+)
+
 target_link_libraries(processTest PUBLIC processLib)
 target_link_libraries(processTest PRIVATE GTest::gtest GTest::gtest_main)
 
@@ -40,7 +45,13 @@ target_link_libraries(expandTest PRIVATE GTest::gtest GTest::gtest_main)
 target_link_libraries(globTest PUBLIC expandLib)
 target_link_libraries(globTest PRIVATE GTest::gtest GTest::gtest_main)
 
+target_link_libraries(commandSplitterTest PUBLIC lexerLib)
+target_link_libraries(commandSplitterTest PRIVATE GTest::gtest GTest::gtest_main)
+
+
+
 include(GoogleTest)
 gtest_discover_tests(processTest)
 gtest_discover_tests(expandTest)
 gtest_discover_tests(globTest)
+gtest_discover_tests(commandSplitterTest)

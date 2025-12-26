@@ -11,13 +11,14 @@
 #include <iostream>
 #include <sys/wait.h>
 #include <array>
+#include <fcntl.h>
 #include <string.h>
 #include <thread>
 
 #include "../util/model/executeProcessResult.h"
 
 
-ExecuteProcessResult Spawn::executeProcess(std::vector<char*> argv) {
+ExecuteProcessResult Spawn::executeProcess(Command shellCommand) {
     Env* env = Env::getInstance();
     std::vector<char*> envp;
     int counter = 0;
@@ -30,11 +31,11 @@ ExecuteProcessResult Spawn::executeProcess(std::vector<char*> argv) {
     }
     envp.push_back(NULL);
 
-    return executeProcess(argv, envp);
+    return executeProcess(shellCommand, envp);
 
 }
 
-ExecuteProcessResult Spawn::executeProcess(std::vector<char*> argv, std::vector<char*> envp) {
+ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<char*> envp) {
     const int MSGSIZE = 4096;
     char outbuf[MSGSIZE];
     char errbuf[MSGSIZE];
@@ -46,7 +47,7 @@ ExecuteProcessResult Spawn::executeProcess(std::vector<char*> argv, std::vector<
     if (pipe(stdOutPipe) < 0 || pipe(stdErrPipe) < 0)
         exit(EXIT_FAILURE);
 
-    std::string programName = StringUtil::convertToCppStyleString(argv[0]);
+    std::string programName = StringUtil::convertToCppStyleString(shellCommand.argv[0]);
 
     pid_t c_pid = fork();
     if (c_pid == -1) {
@@ -59,21 +60,55 @@ ExecuteProcessResult Spawn::executeProcess(std::vector<char*> argv, std::vector<
 
         close(stdOutPipe[0]);
         close(stdErrPipe[0]);
-        dup2(stdOutPipe[1], STDOUT_FILENO);
+
+        if (!shellCommand.redirectStandartOutput.empty()) {
+            int fd = open(
+                shellCommand.redirectStandartOutput.c_str(),
+                O_WRONLY | O_CREAT | O_TRUNC,
+                0644
+            );
+
+            if (fd < 0) {
+                perror(shellCommand.redirectStandartOutput.c_str());
+                _exit(1);
+            }
+
+            dup2(fd, STDOUT_FILENO);
+            close(fd);
+        }
+        else {
+            dup2(stdOutPipe[1], STDOUT_FILENO);
+            close(stdOutPipe[1]);
+        }
+
+        if (!shellCommand.redirectStandartInput.empty()) {
+            int fd = open(
+                shellCommand.redirectStandartInput.c_str(),
+                O_RDONLY
+            );
+
+            if (fd < 0) {
+                perror(shellCommand.redirectStandartInput.c_str());
+                _exit(1);
+            }
+
+            dup2(fd, STDIN_FILENO);
+            close(fd);
+        }
+
         dup2(stdErrPipe[1], STDERR_FILENO);
-        close(stdOutPipe[1]);
         close(stdErrPipe[1]);
 
         std::string executablePath = resolveExecutablePath(
-            StringUtil::convertToCppStyleString(argv[0]));
+            StringUtil::convertToCppStyleString(shellCommand.argv[0]));
 
         if (executablePath.empty()) {
-            std::cerr <<  argv[0] << " executable not found" << std::endl;
+            std::cerr <<  shellCommand.argv[0] << " executable not found" << std::endl;
             _exit(127);
         }
 
 
-        execve(StringUtil::convertToCString(executablePath), argv.data(), envp.data());
+        execve(StringUtil::convertToCString(executablePath), shellCommand.argv.data(), envp.data());
 
         perror("execve");
         _exit(126);

@@ -11,6 +11,8 @@ public:
     std::string rawShellCommand;
 
     std::vector<char*> argv;
+    std::string redirectStandartInput;
+    std::string redirectStandartOutput;
 };
 
 #endif //CLASH_COMMAND_H

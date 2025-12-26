@@ -11,8 +11,8 @@
 class Spawn {
 public:
     // execute single command
-    static ExecuteProcessResult executeProcess(std::vector<char*> argv, std::vector<char*> envp);
-    static ExecuteProcessResult executeProcess(std::vector<char*> argv);
+    static ExecuteProcessResult executeProcess(Command shellCommand, std::vector<char*> envp);
+    static ExecuteProcessResult executeProcess(Command shellCommand);
     // execute  pipe
     static ExecuteProcessResult executePipe(Pipe pipe, std::vector<char*> envp);
     static ExecuteProcessResult executePipe(Pipe pipe);

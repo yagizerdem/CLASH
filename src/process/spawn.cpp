@@ -180,7 +180,12 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
                                         std::vector<char*> envp)
 {
     const int MSGSIZE = 4096;
-    int n = pipeModel.commands.size();
+    int n = 0;
+    for (int i = 0; i < pipeModel.commands.size(); i++) {
+        n++;
+        if (!pipeModel.commands[i].redirectStandartOutput.empty())
+            break;
+    }
 
     std::vector<std::array<int,2>> outPipes(n);
     std::vector<std::array<int,2>> errPipes(n);
@@ -198,6 +203,7 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
 
     std::vector<pid_t> pids;
 
+
     for (int i = 0; i < n; i++) {
         pid_t pid = fork();
         if (pid < 0) {
@@ -206,12 +212,50 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
         }
 
         if (pid == 0) {
+            Command shellCommand = pipeModel.commands[i];
 
-            if (i > 0) {
-                dup2(outPipes[i - 1][0], STDIN_FILENO);
+            if (!shellCommand.redirectStandartInput.empty()) {
+                int fd = open(
+                            shellCommand.redirectStandartInput.c_str(),
+                            O_RDONLY
+                        );
+
+                if (fd < 0) {
+                    perror(shellCommand.redirectStandartInput.c_str());
+                    _exit(1);
+                }
+
+                dup2(fd, STDIN_FILENO);
+                close(fd);
+            }
+            else {
+                // previous command stdout
+                if (i > 0) {
+                    dup2(outPipes[i - 1][0], STDIN_FILENO);
+                }
+                // default fallback is terminal
             }
 
-            dup2(outPipes[i][1], STDOUT_FILENO);
+            if (!shellCommand.redirectStandartOutput.empty()) {
+                int fd = open(
+                                shellCommand.redirectStandartOutput.c_str(),
+                                O_WRONLY | O_CREAT | O_TRUNC,
+                                0644
+                            );
+
+                if (fd < 0) {
+                    perror(shellCommand.redirectStandartOutput.c_str());
+                    _exit(1);
+                }
+
+                dup2(fd, STDOUT_FILENO);
+                close(fd);
+            }
+            else {
+                dup2(outPipes[i][1], STDOUT_FILENO);
+            }
+
+
             dup2(errPipes[i][1], STDERR_FILENO);
 
             for (int j = 0; j < n; j++) {
@@ -223,19 +267,19 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
 
             std::string exe = resolveExecutablePath(
                 StringUtil::convertToCppStyleString(
-                    pipeModel.commands[i].argv[0]
+                    shellCommand.argv[0]
                 )
             );
 
             if (exe.empty()) {
-                std::cerr << pipeModel.commands[i].argv[0]
+                std::cerr << shellCommand.argv[0]
                           << ": command not found\n";
                 _exit(127);
             }
 
             execve(
                 exe.c_str(),
-                pipeModel.commands[i].argv.data(),
+                shellCommand.argv.data(),
                 envp.data()
             );
 
@@ -251,7 +295,6 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
         close(errPipes[i][1]);
     }
 
-    std::unordered_map<int, std::string> stdOuts;
     std::unordered_map<int, std::string> stdErrs;
 
     auto readPipe = [&](int fd) {

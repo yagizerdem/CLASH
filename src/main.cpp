@@ -17,37 +17,29 @@ int main(int argc, char* argv[], char* envp[]) {
 
     Pipe pipe;
 
-    // ls
+    // ls /nonexistent (stderr üretir)
     Command cmd1;
-    cmd1.rawShellCommand = "ls";
+    cmd1.rawShellCommand = "";
     cmd1.argv = {
-        const_cast<char*>("ls"),
-        nullptr
-    };
-
-    // grep cpp
-    Command cmd2;
-    cmd2.rawShellCommand = "grep cpp";
-    cmd2.argv = {
-        const_cast<char*>("grep"),
-        const_cast<char*>("cpp"),
+        const_cast<char*>("cat"),
         nullptr
     };
 
     // wc -l
-    Command cmd3;
-    cmd3.rawShellCommand = "wc -l";
-    cmd3.argv = {
+    Command cmd2;
+    cmd2.rawShellCommand = "wc";
+    cmd2.argv = {
         const_cast<char*>("wc"),
-        const_cast<char*>("-l"),
+        const_cast<char*>("-c"),
         nullptr
     };
 
-    pipe.commands = { cmd1, cmd2, cmd3 };
+    pipe.commands = { cmd1, cmd2 };
 
     ExecuteProcessResult result  = Spawn::executePipe(pipe);
 
     std::cout << result.stdOut << std::endl;
+    std::cout << result.stdErr << std::endl;
     std::cout << "hit"<< std::endl;
 
     return 0;

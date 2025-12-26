@@ -141,162 +141,138 @@ ExecuteProcessResult Spawn::executeProcess(std::vector<char*> argv, std::vector<
     return result;
 }
 
-ExecuteProcessResult Spawn::executePipe(Pipe pipeModel, std::vector<char*> envp) {
+ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
+                                        std::vector<char*> envp)
+{
     const int MSGSIZE = 4096;
-    std::vector<std::array<int, 2>> std_out_channels;
-    std::vector<std::array<int, 2>> std_err_channels;
-    std::unordered_map<int, std::string> std_outs;
-    std::unordered_map<int, std::string> std_errs;
-    std::unordered_map<int, int> exit_status;
-    std::vector<int> pids;
+    int n = pipeModel.commands.size();
 
-    for (int i = 0; i < pipeModel.commands.size(); i++) {
-        std::array<int, 2> p_out;
-        std::array<int, 2> p_err;
-        if (pipe(p_out.data()) < 0) {
+    std::vector<std::array<int,2>> outPipes(n);
+    std::vector<std::array<int,2>> errPipes(n);
+
+    for (int i = 0; i < n; i++) {
+        if (pipe(outPipes[i].data()) < 0) {
+            perror("pipe stdout");
             exit(EXIT_FAILURE);
         }
-        if (pipe(p_err.data()) < 0) {
+        if (pipe(errPipes[i].data()) < 0) {
+            perror("pipe stderr");
             exit(EXIT_FAILURE);
         }
-        std_out_channels.push_back(p_out);
-        std_err_channels.push_back(p_err);
     }
 
-    for (int i = 0; i < pipeModel.commands.size(); i++) {
-        Command shellCommand = pipeModel.commands[i];
-        int *current_out_fd = std_out_channels[i].data();
-        int *current_err_fd = std_err_channels[i].data();
-        int *prev_out_fd = i == 0 ? nullptr : std_out_channels[i - 1].data();
+    std::vector<pid_t> pids;
 
-        std::string programName = StringUtil::convertToCppStyleString(shellCommand.argv[0]);
-
-        pid_t c_pid = fork();
-        if (c_pid == -1) {
+    for (int i = 0; i < n; i++) {
+        pid_t pid = fork();
+        if (pid < 0) {
             perror("fork");
             exit(EXIT_FAILURE);
         }
 
-        if (c_pid == 0) {
-            // CHILD
+        if (pid == 0) {
 
-            dup2(current_out_fd[1], STDOUT_FILENO);
-            dup2(current_err_fd[1], STDERR_FILENO);
-
-            if (prev_out_fd != nullptr) {
-                dup2(prev_out_fd[0], STDIN_FILENO);
-                close(prev_out_fd[0]);
+            if (i > 0) {
+                dup2(outPipes[i - 1][0], STDIN_FILENO);
             }
 
-            for (int j = 0; j < std_out_channels.size(); j++) {
-                close(current_out_fd[j]);
-                close(current_err_fd[j]);
+            dup2(outPipes[i][1], STDOUT_FILENO);
+            dup2(errPipes[i][1], STDERR_FILENO);
+
+            for (int j = 0; j < n; j++) {
+                close(outPipes[j][0]);
+                close(outPipes[j][1]);
+                close(errPipes[j][0]);
+                close(errPipes[j][1]);
             }
 
-            std::string executablePath = resolveExecutablePath(
-                StringUtil::convertToCppStyleString(shellCommand.argv[0]));
+            std::string exe = resolveExecutablePath(
+                StringUtil::convertToCppStyleString(
+                    pipeModel.commands[i].argv[0]
+                )
+            );
 
-            if (executablePath.empty()) {
-                std::cerr <<  shellCommand.argv[0] << " executable not found" << std::endl;
+            if (exe.empty()) {
+                std::cerr << pipeModel.commands[i].argv[0]
+                          << ": command not found\n";
+                _exit(127);
             }
 
-            execve(StringUtil::convertToCString(executablePath), shellCommand.argv.data(), envp.data());
+            execve(
+                exe.c_str(),
+                pipeModel.commands[i].argv.data(),
+                envp.data()
+            );
 
             perror("execve");
             _exit(126);
         }
 
-        close(current_out_fd[1]);
-        close(current_err_fd[1]);
-        pids.push_back(c_pid);
-
+        pids.push_back(pid);
     }
 
+    for (int i = 0; i < n; i++) {
+        close(outPipes[i][1]);
+        close(errPipes[i][1]);
+    }
 
-    auto readStdOut = [&std_out_channels, &std_outs](int i) -> void {
-        size_t n;
-        char outbuf[MSGSIZE];
-        std::string stdOut = "";
-        int *stdOutPipe = std_out_channels[i].data();
-        while ((n = read(stdOutPipe[0], outbuf, MSGSIZE)) > 0) {
-            stdOut.append(outbuf, n);
+    std::unordered_map<int, std::string> stdOuts;
+    std::unordered_map<int, std::string> stdErrs;
+
+    auto readPipe = [&](int fd) {
+        std::string result;
+        char buf[MSGSIZE];
+        ssize_t r;
+        while ((r = read(fd, buf, MSGSIZE)) > 0) {
+            result.append(buf, r);
         }
-        close(stdOutPipe[0]);
-        std_outs[i] = stdOut;
+        return result;
     };
 
-    auto readStdErr = [&std_err_channels, &std_errs](int i) -> void {
-        size_t n;
-        char outbuf[MSGSIZE];
-        std::string stdErr = "";
-        int *stdErrPipe = std_err_channels[i].data();
-        while ((n = read(stdErrPipe[0], outbuf, MSGSIZE)) > 0) {
-            stdErr.append(outbuf, n);
-        }
-        close(stdErrPipe[0]);
-        std_errs[i] = stdErr;
-    };
-
-    std::vector<std::thread> threads;
-    for (int i = 0; i < pipeModel.commands.size(); i++) {
-        std::thread t_std_out(readStdOut, i);
-        std::thread t_std_err(readStdErr, i);
-        threads.push_back(std::move(t_std_out));
-        threads.push_back(std::move(t_std_err));
+    for (int i = 0; i < n; i++) {
+        stdErrs[i] = readPipe(errPipes[i][0]);
+        close(errPipes[i][0]);
     }
 
-    for (int i = 0; i < threads.size(); i++) {
-        threads[i].join();
-    }
+    std::string finalStdOut = readPipe(outPipes[n - 1][0]);
+    close(outPipes[n - 1][0]);
 
+    // wait
+    std::unordered_map<int,int> exit_status;
     for (int i = 0; i < pids.size(); i++) {
         int status;
         waitpid(pids[i], &status, 0);
         exit_status[i] = status;
     }
 
-    // last exit status
-    int lastProcessExitStatus = exit_status[pipeModel.commands.size() - 1];
-    std::string mergedErrorMessages;
-    for (auto i : std_errs) {
-        if (!i.second.empty()) {
-            mergedErrorMessages += i.second + " \n";
+    ExecuteProcessResult result;
+
+    result.stdOut = finalStdOut;
+
+    for (auto &e : stdErrs) {
+        if (!e.second.empty()) {
+            result.stdErr += e.second;
+            result.stdErr += "\n";
         }
     }
 
-    ExecuteProcessResult result;
-    result.stdOut = std_outs[pipeModel.commands.size() - 1];
-    result.stdErr = mergedErrorMessages;
+    int lastStatus = exit_status[n - 1];
 
-    if ( WIFEXITED(lastProcessExitStatus) )
-    {
-        int lastExitStatus = WEXITSTATUS(lastProcessExitStatus);
-
-        result.exitCode= lastExitStatus;
-        result.signaled = false;
+    if (WIFEXITED(lastStatus)) {
+        result.exitCode = WEXITSTATUS(lastStatus);
         result.exitedNormally = true;
+        result.signaled = false;
     }
-    else if (WIFSIGNALED(lastProcessExitStatus)) {
-        int lastExitStatus = 128 + WTERMSIG(lastProcessExitStatus);
-        int sig = WTERMSIG(lastProcessExitStatus);
-
-        result.exitCode = lastExitStatus;
+    else if (WIFSIGNALED(lastStatus)) {
+        result.exitCode = 128 + WTERMSIG(lastStatus);
         result.signaled = true;
-        result.signal = sig;
+        result.signal = WTERMSIG(lastStatus);
         result.exitedNormally = false;
-
-    }
-    else {
-        int lastExitStatus = EXIT_FAILURE; // default fallback
-
-        result.signaled = false;
-        result.exitedNormally = true;
-        result.exitCode = lastExitStatus;
     }
 
     return result;
-
 }
+
 
 ExecuteProcessResult Spawn::executePipe(Pipe pipe) {
     Env* env = Env::getInstance();

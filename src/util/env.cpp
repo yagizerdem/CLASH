@@ -31,6 +31,7 @@ void Env::loadEnvp(char* envp[]) {
             j++;
         }
         this->setEnv(key, value);
+        this->exportEnv(key);
     }
 }
 

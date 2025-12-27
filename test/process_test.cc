@@ -24,3 +24,17 @@ TEST(SpawnProcessTest, Basic) {
     std::string resolvedPath = Spawn::resolveExecutablePath("./Desktop/processTest");
     ASSERT_EQ(resolvedPath, "./Desktop/processTest");
 }
+
+TEST(SpawnProcessTest, Environ) {
+    Command cmd1;
+    cmd1.rawShellCommand = "env";
+    cmd1.argv = {
+        const_cast<char*>("env"),
+        nullptr
+    };
+
+    Spawn spawn;
+
+    ExecuteProcessResult result =  spawn.executeProcess(cmd1);
+    std::cout << result.stdOut << std::endl;
+}

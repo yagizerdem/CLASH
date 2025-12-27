@@ -1,5 +1,7 @@
 add_executable(CLASH main.cpp
-        util/model/word.h)
+        util/model/word.h
+        parser/parseCommand.cpp
+        parser/parseCommand.h)
 
 
 file(GLOB_RECURSE util CONFIGURE_DEPENDS ./util/*.cpp ./util/*.h)

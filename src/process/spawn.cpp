@@ -26,7 +26,9 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand) {
         std::string key = i->first;
         std::string value = i->second.value;
         std::string env_val  = key.append("=").append(value);
-        envp.push_back(strdup(StringUtil::convertToCString(env_val)));
+        if (i->second.isExported) {
+            envp.push_back(strdup(StringUtil::convertToCString(env_val)));
+        }
         counter++;
     }
     envp.push_back(NULL);
@@ -360,7 +362,9 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipe) {
         std::string key = i->first;
         std::string value = i->second.value;
         std::string env_val  = key.append("=").append(value);
-        envp.push_back(strdup(StringUtil::convertToCString(env_val)));
+        if (i->second.isExported) {
+            envp.push_back(strdup(StringUtil::convertToCString(env_val)));
+        }
         counter++;
     }
     envp.push_back(NULL);

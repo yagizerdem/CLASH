@@ -22,15 +22,13 @@ TEST(ParseCommandTest, Basic) {
     cmd.wordStream.push_back(w2);
 
     Command parsedCmd = pc.parse(cmd);
-    ASSERT_EQ(parsedCmd.argv.size(), 3); // null termination adds +1 argv
+    ASSERT_EQ(parsedCmd.argv.size(), 2);
     ASSERT_EQ(parsedCmd.argv[0], "echo");
     ASSERT_EQ(parsedCmd.argv[1], "java");
     ASSERT_EQ(parsedCmd.redirectStandartInput, "");
     ASSERT_EQ(parsedCmd.redirectStandartOutput, "");
     ASSERT_EQ(parsedCmd.identifier, "");
     ASSERT_EQ(parsedCmd.value, "");
-
-
 }
 
 TEST(ParseCommandTest, CdBasic) {
@@ -94,10 +92,9 @@ TEST(ParseCommandTest, ExternalEchoStdoutRedirection) {
 
     ASSERT_EQ(parsed.commandType, Command::EXECUTABLE_COMMAND);
 
-    ASSERT_EQ(parsed.argv.size(), 3);
+    ASSERT_EQ(parsed.argv.size(), 2);
     ASSERT_EQ(parsed.argv[0], "echo");
     ASSERT_EQ(parsed.argv[1], "hi");
-    ASSERT_EQ(parsed.argv[2], nullptr);
 
     ASSERT_EQ(parsed.redirectStandartOutput, "out.txt");
 }
@@ -115,10 +112,9 @@ TEST(ParseCommandTest, ExternalEchoBasic) {
 
     ASSERT_EQ(parsed.commandType, Command::EXECUTABLE_COMMAND);
 
-    ASSERT_EQ(parsed.argv.size(), 3); // echo, java, nullptr
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[0]), "echo");
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[1]), "java");
-    ASSERT_EQ(parsed.argv[2], nullptr);
+    ASSERT_EQ(parsed.argv.size(), 2); // echo, java
+    ASSERT_EQ(parsed.argv[0], "echo");
+    ASSERT_EQ(parsed.argv[1], "java");
 
     ASSERT_EQ(parsed.redirectStandartInput, "");
     ASSERT_EQ(parsed.redirectStandartOutput, "");
@@ -157,8 +153,8 @@ TEST(ParseCommandTest, BuiltinCdBasic) {
     ASSERT_EQ(parsed.commandType, Command::CD);
 
     ASSERT_EQ(parsed.argv.size(), 2);
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[0]), "cd");
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[1]), "/tmp");
+    ASSERT_EQ(parsed.argv[0], "cd");
+    ASSERT_EQ(parsed.argv[1], "/tmp");
 
     ASSERT_EQ(parsed.redirectStandartInput, "");
     ASSERT_EQ(parsed.redirectStandartOutput, "");
@@ -176,7 +172,7 @@ TEST(ParseCommandTest, BuiltinCdNoArgument) {
 
     ASSERT_EQ(parsed.commandType, Command::CD);
     ASSERT_EQ(parsed.argv.size(), 1);
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[0]), "cd");
+    ASSERT_EQ(parsed.argv[0], "cd");
 }
 
 TEST(ParseCommandTest, BuiltinCdTooManyArgs) {
@@ -205,7 +201,7 @@ TEST(ParseCommandTest, BuiltinExitWithStatus) {
 
     ASSERT_EQ(parsed.commandType, Command::EXIT);
     ASSERT_EQ(parsed.argv.size(), 2);
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[1]), "1");
+    ASSERT_EQ(parsed.argv[1], "1");
 }
 
 TEST(ParseCommandTest, AssignmentBasic) {
@@ -221,7 +217,7 @@ TEST(ParseCommandTest, AssignmentBasic) {
     ASSERT_EQ(parsed.commandType, Command::ASSIGNMENT);
 
     ASSERT_EQ(parsed.argv.size(), 1);
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[0]), "x=5");
+    ASSERT_EQ(parsed.argv[0], "x=5");
 
     ASSERT_EQ(parsed.identifier, "x");
     ASSERT_EQ(parsed.value, "5");
@@ -715,7 +711,7 @@ TEST(ParseCommandEdgeCaseTest, QuotedRedirectionNotRecognized) {
     Command parsed = pc.parse(cmd);
     // context != UN_QUOTE, so not recognized as redirection
     ASSERT_EQ(parsed.redirectStandartOutput, "");
-    ASSERT_EQ(parsed.argv.size(), 4); // echo, test, >, out.txt, nullptr
+    ASSERT_EQ(parsed.argv.size(), 4); // echo, test, >, out.txt
 }
 
 TEST(ParseCommandEdgeCaseTest, MixedInputOutputRedirections) {
@@ -731,7 +727,7 @@ TEST(ParseCommandEdgeCaseTest, MixedInputOutputRedirections) {
     Command parsed = pc.parse(cmd);
     ASSERT_EQ(parsed.redirectStandartInput, "input.txt");
     ASSERT_EQ(parsed.redirectStandartOutput, "output.txt");
-    ASSERT_EQ(parsed.argv.size(), 2); // sort, nullptr
+    ASSERT_EQ(parsed.argv.size(), 1); // sort only
 }
 
 TEST(ParseCommandEdgeCaseTest, RedirectionInMiddleOfArguments) {
@@ -745,17 +741,17 @@ TEST(ParseCommandEdgeCaseTest, RedirectionInMiddleOfArguments) {
         {"arg2", Word::UN_QUOTE}
     };
     Command parsed = pc.parse(cmd);
-    // Redirections removed, argv = echo, arg1, arg2, nullptr
-    ASSERT_EQ(parsed.argv.size(), 4);
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[1]), "arg1");
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[2]), "arg2");
+    // Redirections removed, argv = echo, arg1, arg2
+    ASSERT_EQ(parsed.argv.size(), 3);
+    ASSERT_EQ(parsed.argv[1], "arg1");
+    ASSERT_EQ(parsed.argv[2], "arg2");
 }
 
 // ============================================================================
 // ARGV CLASSIFICATION EDGE CASES
 // ============================================================================
 
-TEST(ParseCommandEdgeCaseTest, ExecutableCommandHasNullTerminator) {
+TEST(ParseCommandEdgeCaseTest, ExecutableCommandNoNullTerminator) {
     ParseCommand pc;
     Command cmd;
     cmd.wordStream = {
@@ -764,8 +760,7 @@ TEST(ParseCommandEdgeCaseTest, ExecutableCommandHasNullTerminator) {
     };
     Command parsed = pc.parse(cmd);
     ASSERT_EQ(parsed.commandType, Command::EXECUTABLE_COMMAND);
-    ASSERT_EQ(parsed.argv.size(), 3); // ls, -la, nullptr
-    ASSERT_EQ(parsed.argv[2], nullptr);
+    ASSERT_EQ(parsed.argv.size(), 2); // ls, -la (no nullptr)
 }
 
 TEST(ParseCommandEdgeCaseTest, BuiltinCommandNoNullTerminator) {
@@ -791,9 +786,8 @@ TEST(ParseCommandEdgeCaseTest, AllArgumentsAreRedirections) {
     };
     // No command before redirections
     Command parsed = pc.parse(cmd);
-    // All items are skipped in classifyArgv, argv is empty or only nullptr
-    ASSERT_TRUE(parsed.argv.empty() ||
-                (parsed.argv.size() == 1 && parsed.argv[0] == nullptr));
+    // All items are skipped in classifyArgv, argv is empty
+    ASSERT_TRUE(parsed.argv.empty());
 }
 
 TEST(ParseCommandEdgeCaseTest, RedirectionSkipsNextWord) {
@@ -807,9 +801,9 @@ TEST(ParseCommandEdgeCaseTest, RedirectionSkipsNextWord) {
     };
     Command parsed = pc.parse(cmd);
     // After <, i++ skips input.txt in classifyArgv
-    ASSERT_EQ(parsed.argv.size(), 3); // cat, extra, nullptr
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[0]), "cat");
-    ASSERT_EQ(StringUtil::convertToCppStyleString(parsed.argv[1]), "extra");
+    ASSERT_EQ(parsed.argv.size(), 2); // cat, extra
+    ASSERT_EQ(parsed.argv[0], "cat");
+    ASSERT_EQ(parsed.argv[1], "extra");
 }
 
 // ============================================================================
@@ -835,7 +829,7 @@ TEST(ParseCommandEdgeCaseTest, CommandWithManyArguments) {
         cmd.wordStream.push_back({"file" + std::to_string(i) + ".c", Word::UN_QUOTE});
     }
     Command parsed = pc.parse(cmd);
-    ASSERT_EQ(parsed.argv.size(), 102); // gcc + 100 files + nullptr
+    ASSERT_EQ(parsed.argv.size(), 101); // gcc + 100 files (no nullptr)
 }
 
 TEST(ParseCommandEdgeCaseTest, InterleavedRedirectionsAndArguments) {
@@ -853,8 +847,8 @@ TEST(ParseCommandEdgeCaseTest, InterleavedRedirectionsAndArguments) {
     Command parsed = pc.parse(cmd);
     ASSERT_EQ(parsed.redirectStandartInput, "data.txt");
     ASSERT_EQ(parsed.redirectStandartOutput, "sorted.txt");
-    // argv = sort, -n, -r, nullptr
-    ASSERT_EQ(parsed.argv.size(), 4);
+    // argv = sort, -n, -r
+    ASSERT_EQ(parsed.argv.size(), 3);
 }
 
 TEST(ParseCommandEdgeCaseTest, CaseInsensitiveVariableNames) {

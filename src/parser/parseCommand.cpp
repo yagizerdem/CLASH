@@ -71,6 +71,14 @@ Command ParseCommand::parse(Command shellCommand) {
             parsedCommand.identifier += statement[i];
             i++;
         }
+
+        if (!isValidVarName(parsedCommand.identifier)) {
+            throw std::invalid_argument(
+                 "export: `" + parsedCommand.identifier  +
+                 "': not a valid identifier"
+             );
+        }
+
         while (i < statement.size()) {
             parsedCommand.value += statement[i];
             i++;

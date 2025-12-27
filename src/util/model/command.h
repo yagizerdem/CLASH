@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "word.h"
+#include "../stringUtil.h"
 
 class Command {
 public:
@@ -28,13 +29,23 @@ public:
     std::vector<Word> wordStream;
 
     // parse part + syntax checking
-    std::vector<char*> argv;
+    std::vector<std::string> argv;
     std::string redirectStandartInput; // file name for stdin
     std::string redirectStandartOutput; // file name for stdout
     CommandType commandType;
     // useful properties for assignment
     std::string identifier;
     std::string value;
+
+    std::vector<char*> toExecveArgv() {
+        std::vector<char*> execveArgv;
+        for (int i = 0; i < argv.size(); i++) {
+            char* p = const_cast<char*>(argv[i].c_str());
+            execveArgv.push_back(p);
+        }
+        execveArgv.push_back(nullptr);
+        return  execveArgv;
+    }
 };
 
 #endif //CLASH_COMMAND_H

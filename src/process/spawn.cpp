@@ -49,7 +49,7 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<cha
     if (pipe(stdOutPipe) < 0 || pipe(stdErrPipe) < 0)
         exit(EXIT_FAILURE);
 
-    std::string programName = StringUtil::convertToCppStyleString(shellCommand.argv[0]);
+    std::string programName = shellCommand.argv[0];
 
     pid_t c_pid = fork();
     if (c_pid == -1) {
@@ -101,16 +101,16 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<cha
         dup2(stdErrPipe[1], STDERR_FILENO);
         close(stdErrPipe[1]);
 
-        std::string executablePath = resolveExecutablePath(
-            StringUtil::convertToCppStyleString(shellCommand.argv[0]));
+        std::string executablePath = resolveExecutablePath(shellCommand.argv[0]);
 
         if (executablePath.empty()) {
             std::cerr <<  shellCommand.argv[0] << " executable not found" << std::endl;
             _exit(127);
         }
 
+        auto execveArgv = shellCommand.toExecveArgv();
 
-        execve(StringUtil::convertToCString(executablePath), shellCommand.argv.data(), envp.data());
+        execve(StringUtil::convertToCString(executablePath), execveArgv.data(), envp.data());
 
         perror("execve");
         _exit(126);
@@ -267,11 +267,7 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
                 close(errPipes[j][1]);
             }
 
-            std::string exe = resolveExecutablePath(
-                StringUtil::convertToCppStyleString(
-                    shellCommand.argv[0]
-                )
-            );
+            std::string exe = resolveExecutablePath(shellCommand.argv[0]);
 
             if (exe.empty()) {
                 std::cerr << shellCommand.argv[0]
@@ -279,9 +275,10 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
                 _exit(127);
             }
 
+            auto execveArgv = shellCommand.toExecveArgv();
             execve(
                 exe.c_str(),
-                shellCommand.argv.data(),
+                execveArgv.data(),
                 envp.data()
             );
 

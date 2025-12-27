@@ -15,7 +15,6 @@ int main(int argc, char* argv[], char* envp[]) {
     setDefaultEnv(envp);
 
 
-
     return 0;
 }
 

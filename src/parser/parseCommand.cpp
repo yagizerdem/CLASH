@@ -29,9 +29,9 @@ Command ParseCommand::parse(Command shellCommand) {
 
     if (parsedCommand.commandType == Command::UNSET) {
         for (size_t i = 1; i < parsedCommand.argv.size(); ++i) {
-            if (!isValidVarName(StringUtil::convertToCppStyleString(parsedCommand.argv[i]))) {
+            if (!isValidVarName(parsedCommand.argv[i])) {
                 throw std::invalid_argument(
-                    "unset: `" + StringUtil::convertToCppStyleString(parsedCommand.argv[i]) +
+                    "unset: `" + parsedCommand.argv[i] +
                     "': not a valid identifier"
                 );
             }
@@ -40,9 +40,9 @@ Command ParseCommand::parse(Command shellCommand) {
 
     if (parsedCommand.commandType == Command::EXPORT) {
         for (size_t i = 1; i < parsedCommand.argv.size(); ++i) {
-            if (!isValidVarName(StringUtil::convertToCppStyleString(parsedCommand.argv[i]))) {
+            if (!isValidVarName(parsedCommand.argv[i])) {
                 throw std::invalid_argument(
-                    "export: `" + StringUtil::convertToCppStyleString(parsedCommand.argv[i])  +
+                    "export: `" + parsedCommand.argv[i]  +
                     "': not a valid identifier"
                 );
             }
@@ -62,7 +62,7 @@ Command ParseCommand::parse(Command shellCommand) {
                   );
         }
         int i = 0;
-        std::string statement = StringUtil::convertToCppStyleString(parsedCommand.argv[i]);
+        std::string statement = parsedCommand.argv[i];
         while (i < statement.size()) {
             if (statement[i] == '=') {
                 i++; // skip =
@@ -186,8 +186,8 @@ std::string ParseCommand::classifyStdOutput(Command command) {
     return last;
 }
 
-std::vector<char*> ParseCommand::classifyArgv(Command command) {
-    std::vector<char*> argv;
+std::vector<std::string> ParseCommand::classifyArgv(Command command) {
+    std::vector<std::string> argv;
 
     for (size_t i = 0; i < command.wordStream.size(); ++i) {
         const Word& w = command.wordStream[i];
@@ -198,10 +198,9 @@ std::vector<char*> ParseCommand::classifyArgv(Command command) {
             continue;
             }
 
-        argv.push_back(const_cast<char*>(w.lexeme.c_str()));
+        argv.push_back(w.lexeme);
     }
 
-    argv.push_back(nullptr); // must have for execve
     return argv;
 }
 

@@ -10,8 +10,15 @@
 #include "../lexer/wordSplitter.h"
 #include "../parser/parseCommand.h"
 #include "../process/spawn.h"
+#include "../util/env.h"
 #include "../util/stringUtil.h"
 #include "../util/model/variable.h"
+
+
+std::string LTR_scanner::singlePass(std::string rawShellCommand) {
+    Env* env = Env::getInstance();
+    return  singlePass(rawShellCommand, env->environment_variables);
+}
 
 std::string LTR_scanner::singlePass(std::string rawShellCommand, std::unordered_map<std::string, Variable> env) {
     std::string expanded;

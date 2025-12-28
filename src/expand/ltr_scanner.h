@@ -13,6 +13,7 @@
 class LTR_scanner {
 public:
     std::string singlePass(std::string rawShellCommand, std::unordered_map<std::string, Variable> env);
+    std::string singlePass(std::string rawShellCommand);
 private:
     enum Context {
         SINGLE_QUOTE,

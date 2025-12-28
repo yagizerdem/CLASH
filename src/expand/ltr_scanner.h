@@ -19,6 +19,7 @@ private:
         SINGLE_QUOTE,
         DOUBLE_QUOTE,
         UNQUOTE,
+        BACKTICK
     };
     struct CollectWordResult {
         std::string word;
@@ -27,6 +28,7 @@ private:
     CollectWordResult collectDoubleQuoteWord(std::string rawCommand,int startIndex);
     CollectWordResult collectSingleQuoteWord(std::string rawCommand,int startIndex);
     CollectWordResult collectUnQuoteWord(std::string rawCommand,int startIndex);
+    CollectWordResult collectBackTickWord(std::string rawCommand,int startIndex);
 
     // expand
     struct CollectVariableResult {
@@ -35,10 +37,11 @@ private:
     };
     std::string expand(std::string word, std::unordered_map<std::string, Variable> env);
     CollectVariableResult collectVariable(std::string word, int startIndex);
-    std::string collectBackTick(std::string word, int startIndex);
+    std::string collectShellCommand(std::string word, int startIndex);
     std::string normalizeVariable(std::string variable);
     std::string normalizeShellCommand(std::string variable);
 
+    std::string normalizeStdOut(std::string out);
 };
 
 

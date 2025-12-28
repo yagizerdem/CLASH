@@ -33,11 +33,14 @@ std::string LTR_scanner::singlePass(std::string rawShellCommand, std::unordered_
         }
 
         CollectWordResult collect_word_result;
-        if (rawShellCommand[lookAheadIndex] == '"') {
+        if (rawShellCommand[lookAheadIndex] == '"' && !StringUtil::isEscapedCharacter(lookAheadIndex, rawShellCommand)) {
+            collect_word_result = collectDoubleQuoteWord(rawShellCommand, lookAheadIndex);
+        }
+        else if (rawShellCommand[lookAheadIndex] == '\'' && !StringUtil::isEscapedCharacter(lookAheadIndex, rawShellCommand)) {
             collect_word_result = collectSingleQuoteWord(rawShellCommand, lookAheadIndex);
         }
-        else if (rawShellCommand[lookAheadIndex] == '\'') {
-            collect_word_result = collectDoubleQuoteWord(rawShellCommand, lookAheadIndex);
+        else if (rawShellCommand[lookAheadIndex] == '`' && !StringUtil::isEscapedCharacter(lookAheadIndex, rawShellCommand)) {
+            collect_word_result = collectBackTickWord(rawShellCommand, lookAheadIndex);
         }
         else {
             collect_word_result = collectUnQuoteWord(rawShellCommand, lookAheadIndex);
@@ -54,7 +57,8 @@ std::string LTR_scanner::singlePass(std::string rawShellCommand, std::unordered_
             lookAheadIndex += collect_word_result.word.length();
         }
 
-        if (collect_word_result.context == LTR_scanner::UNQUOTE) {
+        if (collect_word_result.context == LTR_scanner::UNQUOTE ||
+                collect_word_result.context == LTR_scanner::BACKTICK) {
             std::string expanded_word = expand(collect_word_result.word, env);
             expanded += expanded_word;
             lookAheadIndex += collect_word_result.word.length();
@@ -74,7 +78,8 @@ LTR_scanner::CollectWordResult LTR_scanner::collectDoubleQuoteWord(std::string r
     result.context = LTR_scanner::DOUBLE_QUOTE;
     int curIndex = startIndex;
     result.word += "\"";
-    while (!(rawShellCommand[curIndex] == '"' && StringUtil::isEscapedCharacter(curIndex, rawShellCommand))) {
+    curIndex++; // consume "
+    while (!(rawShellCommand[curIndex] == '"' && !StringUtil::isEscapedCharacter(curIndex, rawShellCommand))) {
         result.word += rawShellCommand[curIndex];
         curIndex++;
     }
@@ -88,7 +93,8 @@ LTR_scanner::CollectWordResult LTR_scanner::collectSingleQuoteWord(std::string r
     result.context = LTR_scanner::SINGLE_QUOTE;
     int curIndex = startIndex;
     result.word += "'";
-    while (!(rawShellCommand[curIndex] == '\'' && StringUtil::isEscapedCharacter(curIndex, rawShellCommand))) {
+    curIndex++; // consume  '
+    while (!(rawShellCommand[curIndex] == '\'' && !StringUtil::isEscapedCharacter(curIndex, rawShellCommand))) {
         result.word += rawShellCommand[curIndex];
         curIndex++;
     }
@@ -101,15 +107,39 @@ LTR_scanner::CollectWordResult LTR_scanner::collectUnQuoteWord(std::string rawSh
     CollectWordResult result;
     result.context = LTR_scanner::UNQUOTE;
     int curIndex = startIndex;
-    while (!(rawShellCommand[curIndex] == ' '||
-        rawShellCommand[curIndex] == '\n' ||
-        rawShellCommand[curIndex] == '\t')) {
+    while (curIndex < rawShellCommand.length() &&
+           rawShellCommand[curIndex] != ' ' &&
+           rawShellCommand[curIndex] != '\n' &&
+           rawShellCommand[curIndex] != '\t') {
         result.word += rawShellCommand[curIndex];
         curIndex++;
     }
 
     return result;
 }
+
+LTR_scanner::CollectWordResult LTR_scanner::collectBackTickWord(std::string rawShellCommand, int startIndex) {
+    CollectWordResult result;
+    result.context = LTR_scanner::BACKTICK;
+    int curIndex = startIndex;
+    result.word += "`";
+    curIndex++; // consume  '
+    while (!(rawShellCommand[curIndex] == '`' && !StringUtil::isEscapedCharacter(curIndex, rawShellCommand)) &&
+        curIndex < rawShellCommand.length()
+    ) {
+        result.word += rawShellCommand[curIndex];
+        curIndex++;
+    }
+
+    if (curIndex == rawShellCommand.length() && rawShellCommand[curIndex -1] != '`') {
+        throw std::invalid_argument("syntax error: missing '`'");
+    }
+
+    result.word += "`";
+
+    return result;
+}
+
 
 // expand
 
@@ -124,7 +154,7 @@ std::string LTR_scanner::expand(std::string word, std::unordered_map<std::string
             expanded += env[normalized].value;
         }
         else if (word[lookAhead] == '`' && !StringUtil::isEscapedCharacter(lookAhead, word)) {
-            std::string shellCommand = collectBackTick(word, lookAhead);
+            std::string shellCommand = collectShellCommand(word, lookAhead);
             std::string normalized = normalizeShellCommand(shellCommand);
             lookAhead += shellCommand.length();
 
@@ -143,7 +173,7 @@ std::string LTR_scanner::expand(std::string word, std::unordered_map<std::string
                     cmd = parse_command.parse(cmd);
                     ExecuteProcessResult result = Spawn::executeProcess(cmd);
 
-                    if (!result.stdOut.empty()) expanded += result.stdOut;
+                    if (!result.stdOut.empty()) expanded += normalizeStdOut(result.stdOut);
                 }
                 if (pipePtr != nullptr) {
                     Pipe pipe = *pipePtr;
@@ -155,7 +185,7 @@ std::string LTR_scanner::expand(std::string word, std::unordered_map<std::string
                     }
                     ExecuteProcessResult result = Spawn::executePipe(pipe);
 
-                    if (!result.stdOut.empty()) expanded += result.stdOut;
+                    if (!result.stdOut.empty()) expanded += normalizeStdOut(result.stdOut);
                 }
 
 
@@ -191,7 +221,7 @@ LTR_scanner::CollectVariableResult LTR_scanner::collectVariable(std::string word
         return  result;
     }
 
-    if (word[curIndex]  >= '0' || word[curIndex]  <= '9') {
+    if (word[curIndex] >= '0' && word[curIndex] <= '9') {
         result.consume = 2;
         result.identifier.push_back(word[curIndex]);
         return  result;
@@ -216,7 +246,7 @@ LTR_scanner::CollectVariableResult LTR_scanner::collectVariable(std::string word
     }
 
 
-    while (startIndex < word.length() &&  word[curIndex] != ' ') {
+    while (curIndex < word.length() &&  (word[curIndex] != ' ' && word[curIndex] != '"' && word[curIndex] != '$' )) {
         result.identifier.push_back(word[curIndex]);
         curIndex++;
     }
@@ -225,7 +255,7 @@ LTR_scanner::CollectVariableResult LTR_scanner::collectVariable(std::string word
 
 }
 
-std::string LTR_scanner::collectBackTick(std::string word, int startIndex) {
+std::string LTR_scanner::collectShellCommand(std::string word, int startIndex) {
     std::string nestedShellCommand;
     int curIndex = startIndex;
     nestedShellCommand.push_back('`');
@@ -272,9 +302,14 @@ std::string LTR_scanner::normalizeVariable(std::string variable) {
         lookAhead++;
     }
 
-    if (lookAhead >= variable.length()) {
-        throw std::invalid_argument("syntax error: missing '}'");
-    }
 
     return normalizedVariable;
+}
+
+
+std::string LTR_scanner::normalizeStdOut(std::string out) {
+    while (!out.empty() && out.back() == '\n') {
+        out.pop_back();
+    }
+    return out;
 }

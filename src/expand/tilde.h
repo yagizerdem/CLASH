@@ -8,7 +8,7 @@
 
 class Tilde {
 public:
-    std::string expandTilde(std::string word);
+    std::string expandTilde(std::string rawCommand);
 private:
     std::string getHomeDirByUsername(std::string username);
     std::string getHomeDirCurrentUser();

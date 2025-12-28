@@ -107,13 +107,45 @@ LTR_scanner::CollectWordResult LTR_scanner::collectUnQuoteWord(std::string rawSh
     CollectWordResult result;
     result.context = LTR_scanner::UNQUOTE;
     int curIndex = startIndex;
-    while (curIndex < rawShellCommand.length() &&
-           rawShellCommand[curIndex] != ' ' &&
-           rawShellCommand[curIndex] != '\n' &&
-           rawShellCommand[curIndex] != '\t') {
-        result.word += rawShellCommand[curIndex];
-        curIndex++;
+
+    bool isVariableAndInBracket = false;
+    if (rawShellCommand[startIndex] == '$') {
+        if (startIndex + 1 < rawShellCommand.length() && rawShellCommand[startIndex +1] == '{') {
+            isVariableAndInBracket = true;
+        }
     }
+
+    if (!isVariableAndInBracket) {
+        while (curIndex < rawShellCommand.length() &&
+        rawShellCommand[curIndex] != ' ' &&
+        rawShellCommand[curIndex] != '\n' &&
+        rawShellCommand[curIndex] != '\t') {
+
+            if (rawShellCommand[curIndex] == '`' && !StringUtil::isEscapedCharacter(curIndex, rawShellCommand)) {
+                CollectWordResult back_tick_word =  collectBackTickWord(rawShellCommand, curIndex);
+                result.word += back_tick_word.word;
+                curIndex += back_tick_word.word.size();
+            }
+            else {
+                result.word += rawShellCommand[curIndex];
+                curIndex++;
+            }
+
+        }
+    }
+    else {
+
+        if (rawShellCommand[startIndex])
+
+        while (curIndex < rawShellCommand.length() && rawShellCommand[curIndex] != '}') {
+            result.word += rawShellCommand[curIndex];
+            curIndex++;
+        }
+        if (rawShellCommand[curIndex] == '}') {
+            result.word.push_back('}');
+        }
+    }
+
 
     return result;
 }
@@ -156,6 +188,12 @@ std::string LTR_scanner::expand(std::string word, std::unordered_map<std::string
         else if (word[lookAhead] == '`' && !StringUtil::isEscapedCharacter(lookAhead, word)) {
             std::string shellCommand = collectShellCommand(word, lookAhead);
             std::string normalized = normalizeShellCommand(shellCommand);
+
+            // support for variable substitution inside command substitution !
+            std::string quoted = "\"" + normalized + "\"";
+            normalized = expand(quoted, env);
+            normalized = normalized.substr(1, normalized.length() - 2);
+
             lookAhead += shellCommand.length();
 
             CommandSplitter command_splitter;
@@ -246,10 +284,11 @@ LTR_scanner::CollectVariableResult LTR_scanner::collectVariable(std::string word
     }
 
 
-    while (curIndex < word.length() &&  (word[curIndex] != ' ' && word[curIndex] != '"' && word[curIndex] != '$' )) {
+    while (curIndex < word.length() && isVarChar(word[curIndex])) {
         result.identifier.push_back(word[curIndex]);
         curIndex++;
     }
+
     result.consume = result.identifier.length();
     return result;
 
@@ -312,4 +351,8 @@ std::string LTR_scanner::normalizeStdOut(std::string out) {
         out.pop_back();
     }
     return out;
+}
+
+bool LTR_scanner::isVarChar(char c) {
+    return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
 }

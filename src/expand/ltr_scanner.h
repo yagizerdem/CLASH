@@ -42,6 +42,7 @@ private:
     std::string normalizeShellCommand(std::string variable);
 
     std::string normalizeStdOut(std::string out);
+    bool isVarChar(char c);
 };
 
 

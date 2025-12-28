@@ -6,7 +6,7 @@
 #define CLASH_EXECUTIONERROR_H
 
 
-class ExecutionError : public ClashError {
+class executionError : public ClashError {
 public:
     using ClashError::ClashError;
 };

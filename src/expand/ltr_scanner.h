@@ -19,6 +19,25 @@ private:
         DOUBLE_QUOTE,
         UNQUOTE,
     };
+    struct CollectWordResult {
+        std::string word;
+        Context context;
+    };
+    CollectWordResult collectDoubleQuoteWord(std::string rawCommand,int startIndex);
+    CollectWordResult collectSingleQuoteWord(std::string rawCommand,int startIndex);
+    CollectWordResult collectUnQuoteWord(std::string rawCommand,int startIndex);
+
+    // expand
+    struct CollectVariableResult {
+        std::string identifier;
+        int consume;
+    };
+    std::string expand(std::string word, std::unordered_map<std::string, Variable> env);
+    CollectVariableResult collectVariable(std::string word, int startIndex);
+    std::string collectBackTick(std::string word, int startIndex);
+    std::string normalizeVariable(std::string variable);
+    std::string normalizeShellCommand(std::string variable);
+
 };
 
 

@@ -19,6 +19,9 @@ add_library(parserLib STATIC ${parser})
 target_link_libraries(processLib PUBLIC utilLib)
 #expand
 target_link_libraries(expandLib PUBLIC utilLib)
+target_link_libraries(expandLib PUBLIC lexerLib)
+target_link_libraries(expandLib PUBLIC parserLib)
+target_link_libraries(expandLib PUBLIC processLib)
 #lexer
 target_link_libraries(lexerLib PUBLIC utilLib)
 #parser

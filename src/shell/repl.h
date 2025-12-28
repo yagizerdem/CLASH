@@ -8,8 +8,9 @@
 
 
 class REPL {
+public:
     void loop();
-    std::string REPL::lsh_read_line();
+    std::string lsh_read_line();
 };
 
 

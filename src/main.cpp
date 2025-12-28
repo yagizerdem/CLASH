@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "process/spawn.h"
+#include "shell/repl.h"
 #include "util/env.h"
 #include "util/stringUtil.h"
 
@@ -14,6 +15,8 @@ void setDefaultEnv(char* envp[]) {
 int main(int argc, char* argv[], char* envp[]) {
     setDefaultEnv(envp);
 
+    REPL repl;
+    repl.loop();
 
     return 0;
 }

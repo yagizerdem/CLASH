@@ -14,6 +14,7 @@ class LTR_scanner {
 public:
     std::string singlePass(std::string rawShellCommand, std::unordered_map<std::string, Variable> env);
     std::string singlePass(std::string rawShellCommand);
+    std::string normalizeStdOut(std::string out);
 private:
     enum Context {
         SINGLE_QUOTE,
@@ -41,7 +42,7 @@ private:
     std::string normalizeVariable(std::string variable);
     std::string normalizeShellCommand(std::string variable);
 
-    std::string normalizeStdOut(std::string out);
+
     bool isVarChar(char c);
 };
 

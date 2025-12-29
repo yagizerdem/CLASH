@@ -15,6 +15,7 @@ void setDefaultEnv(char* envp[]) {
 int main(int argc, char* argv[], char* envp[]) {
     setDefaultEnv(envp);
 
+    // reply works on interactive mode
     REPL repl;
     repl.loop();
 

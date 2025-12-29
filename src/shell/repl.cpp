@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "engine.h"
+
 
 void REPL::loop() {
     std::string line;
@@ -17,6 +19,8 @@ void REPL::loop() {
     do {
         printf("> ");
         line = lsh_read_line();
+        Engine engine;
+        engine.handleUserInput(line);
 
 
     } while (status);

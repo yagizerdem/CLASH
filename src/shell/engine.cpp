@@ -52,7 +52,7 @@ void Engine::executeCommand(Command shellCommand) {
     ExecuteProcessResult result = spawn.executeProcess(shellCommand);
     result.stdOut = ltr_scanner.normalizeStdOut(result.stdOut);
     result.stdErr = ltr_scanner.normalizeStdOut(result.stdErr);
-    ;
+
 }
 
 void Engine::executePipe(Pipe pipe) {

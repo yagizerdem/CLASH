@@ -27,6 +27,9 @@ private:
     // built ins
     void exitCLASH(Command command);
     void assignment(Command command);
+    void unset(Command command);
+    void exportBuiltIn(Command command);
+    void cd(Command command);
 };
 
 

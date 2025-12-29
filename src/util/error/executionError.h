@@ -4,9 +4,10 @@
 
 #ifndef CLASH_EXECUTIONERROR_H
 #define CLASH_EXECUTIONERROR_H
+#include "clashError.h"
 
 
-class executionError : public ClashError {
+class ExecutionError : public ClashError {
 public:
     using ClashError::ClashError;
 };

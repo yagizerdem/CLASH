@@ -5,9 +5,9 @@
 #ifndef CLASH_CLASHERROR_H
 #define CLASH_CLASHERROR_H
 
-class clashError : public std::exception {
+class ClashError : public std::exception {
 public:
-    explicit clashError(std::string msg)
+    explicit ClashError(std::string msg)
         : message(std::move(msg)) {}
     const char* what() const noexcept override {
         return message.c_str();

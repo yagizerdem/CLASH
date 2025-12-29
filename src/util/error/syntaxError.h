@@ -5,7 +5,7 @@
 #ifndef CLASH_SYNTAXERROR_H
 #define CLASH_SYNTAXERROR_H
 
-class syntaxError : public ClashError {
+class SyntaxError : public ClashError {
 public:
     using ClashError::ClashError;
 };

@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <ostream>
+#include <unistd.h>
 
 #include "../expand/ltr_scanner.h"
 #include "../expand/tilde.h"
@@ -15,6 +16,7 @@
 #include "../parser/parseCommand.h"
 #include "../process/spawn.h"
 #include "../util/env.h"
+#include "../util/error/executionError.h"
 
 EngineResponse Engine::handleUserInput(std::string rawUserInput) {
     EngineResponse response;
@@ -100,6 +102,18 @@ EngineResponse Engine::executeCommand(Command command) {
         assignment(command);
     }
 
+    if (command.commandType == Command::UNSET) {
+        unset(command);
+    }
+
+    if (command.commandType == Command::EXPORT) {
+        exportBuiltIn(command);
+    }
+
+    if (command.commandType == Command::CD) {
+        cd(command);
+    }
+
     return  response;
 }
 
@@ -136,4 +150,49 @@ void Engine::exitCLASH(Command command) {
 void Engine::assignment(Command command) {
     Env *env = Env::getInstance();
     env->setEnv(command.identifier, command.value);
+}
+
+void Engine::unset(Command command) {
+    Env *env = Env::getInstance();
+    for (int i = 1 ; i < command.argv.size() ; i++) {
+        env->unsetEnv(command.argv[i]);
+    }
+}
+
+void Engine::exportBuiltIn(Command command) {
+    Env *env = Env::getInstance();
+    for (int i = 1 ; i < command.argv.size() ; i++) {
+        env->exportEnv(command.argv[i]);
+    }
+}
+
+void Engine::cd(Command command) {
+    Env *env = Env::getInstance();
+    std::string path;
+
+    if (command.argv.size() < 2 || command.argv[1].empty()) {
+        auto home = env->getEnv("HOME");
+        if (home.value.empty()) {
+            std::cerr << "cd: HOME not set\n";
+            return;
+        }
+        path = home.value;
+    }
+    else {
+        path = command.argv[1];
+    }
+
+    if (path == ".") {
+        return;
+    }
+
+    if (chdir(path.c_str()) != 0) {
+        throw ExecutionError("cd: no such file or directory");
+    }
+
+    // update PWD
+    char cwd[4096];
+    if (getcwd(cwd, sizeof(cwd))) {
+        env->setEnv("PWD", cwd);
+    }
 }

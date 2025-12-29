@@ -6,7 +6,7 @@
 #define CLASH_INCOMPLETEINPUT_H
 
 
-class incompleteInput : public ClashError {
+class IncompleteInput : public ClashError {
 public:
     using ClashError::ClashError;
 };

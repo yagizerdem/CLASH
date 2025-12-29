@@ -37,6 +37,11 @@ void Shell::start(int argc, char *argv[]) {
 
 
 void Shell::runInteractiveMode() {
+    Env* env = Env::getInstance();
+    env->setEnv("?", "0");
+    env->setEnv("*", "");
+    env->setEnv("#", "0");
+
     REPL repl;
     repl.loop();
 }

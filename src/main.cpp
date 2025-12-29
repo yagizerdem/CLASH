@@ -1,9 +1,7 @@
-#include <iostream>
 
-#include "process/spawn.h"
-#include "shell/repl.h"
+#include "shell/shell.h"
 #include "util/env.h"
-#include "util/stringUtil.h"
+
 
 void setDefaultEnv(char* envp[]) {
     Env* env = Env::getInstance();
@@ -15,9 +13,8 @@ void setDefaultEnv(char* envp[]) {
 int main(int argc, char* argv[], char* envp[]) {
     setDefaultEnv(envp);
 
-    // reply works on interactive mode
-    REPL repl;
-    repl.loop();
+    Shell shell;
+    shell.start(argc, argv);
 
     return 0;
 }

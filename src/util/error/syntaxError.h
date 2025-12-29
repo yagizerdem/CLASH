@@ -4,6 +4,7 @@
 
 #ifndef CLASH_SYNTAXERROR_H
 #define CLASH_SYNTAXERROR_H
+#include "clashError.h"
 
 class SyntaxError : public ClashError {
 public:

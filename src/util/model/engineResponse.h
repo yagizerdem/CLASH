@@ -12,6 +12,7 @@ public:
     bool success;
     int lastCommandExitStatus;
     bool terminate;
+    bool interactiveContinue;
 };
 
 #endif //CLASH_ENGINERESPONSE_H

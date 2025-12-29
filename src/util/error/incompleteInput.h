@@ -4,6 +4,7 @@
 
 #ifndef CLASH_INCOMPLETEINPUT_H
 #define CLASH_INCOMPLETEINPUT_H
+#include "clashError.h"
 
 
 class IncompleteInput : public ClashError {

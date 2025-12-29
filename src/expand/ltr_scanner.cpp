@@ -12,6 +12,7 @@
 #include "../process/spawn.h"
 #include "../util/env.h"
 #include "../util/stringUtil.h"
+#include "../util/error/syntaxError.h"
 #include "../util/model/variable.h"
 
 
@@ -170,7 +171,7 @@ LTR_scanner::CollectWordResult LTR_scanner::collectBackTickWord(std::string rawS
     }
 
     if (curIndex == rawShellCommand.length() && rawShellCommand[curIndex -1] != '`') {
-        throw std::invalid_argument("syntax error: missing '`'");
+        throw SyntaxError("syntax error: missing '`'");
     }
 
     result.word += "`";
@@ -281,7 +282,7 @@ LTR_scanner::CollectVariableResult LTR_scanner::collectVariable(std::string word
         }
 
         if (curIndex >= word.length()) {
-            throw std::invalid_argument("syntax error: missing '}'");
+            throw SyntaxError("syntax error: missing '}'");
         }
 
         result.identifier.push_back('}');
@@ -312,7 +313,7 @@ std::string LTR_scanner::collectShellCommand(std::string word, int startIndex) {
     }
 
     if (curIndex >= word.length()) {
-        throw std::invalid_argument("syntax error: missing '`'");
+        throw SyntaxError("syntax error: missing '`'");
     }
 
     nestedShellCommand.push_back('`');
@@ -337,7 +338,7 @@ std::string LTR_scanner::normalizeVariable(std::string variable) {
             lookAhead++;
         }
         if (lookAhead >= variable.length()) {
-            throw std::invalid_argument("syntax error: missing '}'");
+            throw SyntaxError("syntax error: missing '}'");
         }
         return normalizedVariable;
     }

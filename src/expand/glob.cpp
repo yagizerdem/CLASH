@@ -14,6 +14,8 @@
 #include <chrono>
 #include <functional>
 
+#include "../util/error/syntaxError.h"
+
 // match pattern
 bool Glob::match(std::string pattern, std::string wildcard) {
     // this is fucking ultra edge case
@@ -110,7 +112,7 @@ std::vector<std::variant<Glob::Token, Glob::BracketToken> > Glob::tokenize(std::
 
 Glob::BracketToken Glob::collectBracket(int startIndex, std::string wildcard) {
     if (wildcard[startIndex] != '[') {
-        throw std::invalid_argument("Glob parse error: expected '[' at position " + startIndex);
+        throw SyntaxError("Glob parse error: expected '[' at position " + startIndex);
     }
     BracketToken bracketToken;
     bracketToken.lexeme = "[";
@@ -125,7 +127,7 @@ Glob::BracketToken Glob::collectBracket(int startIndex, std::string wildcard) {
         startIndex++;
     }
 
-    throw std::invalid_argument("Glob parse error: expected ']' at position " + startIndex);
+    throw SyntaxError("Glob parse error: expected ']' at position " + startIndex);
 }
 
 void Glob::classifyBracket(BracketToken &bracketToken) {

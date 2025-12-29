@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include "../util/stringUtil.h"
+#include "../util/error/syntaxError.h"
 #include "../util/model/command.h"
 
 Command ParseCommand::parse(Command shellCommand) {
@@ -23,17 +24,16 @@ Command ParseCommand::parse(Command shellCommand) {
 
 
     if (parsedCommand.commandType == Command::CD) {
-        if (parsedCommand.argv.size() > 2)
-            throw std::invalid_argument("cd: too many arguments");
+        if (parsedCommand.argv.size() > 2) {
+            throw SyntaxError("cd: too many arguments");
+        }
     }
 
     if (parsedCommand.commandType == Command::UNSET) {
         for (size_t i = 1; i < parsedCommand.argv.size(); ++i) {
             if (!isValidVarName(parsedCommand.argv[i])) {
-                throw std::invalid_argument(
-                    "unset: `" + parsedCommand.argv[i] +
-                    "': not a valid identifier"
-                );
+                throw SyntaxError(   "unset: `" + parsedCommand.argv[i] +
+                    "': not a valid identifier");
             }
         }
     }
@@ -41,7 +41,7 @@ Command ParseCommand::parse(Command shellCommand) {
     if (parsedCommand.commandType == Command::EXPORT) {
         for (size_t i = 1; i < parsedCommand.argv.size(); ++i) {
             if (!isValidVarName(parsedCommand.argv[i])) {
-                throw std::invalid_argument(
+                throw SyntaxError(
                     "export: `" + parsedCommand.argv[i]  +
                     "': not a valid identifier"
                 );
@@ -51,13 +51,13 @@ Command ParseCommand::parse(Command shellCommand) {
 
     if (parsedCommand.commandType == Command::EXIT) {
         if (parsedCommand.argv.size() > 2) {
-            throw std::invalid_argument("exit: too many arguments");
+            throw SyntaxError("exit: too many arguments");
         }
     }
 
     if (parsedCommand.commandType  == Command::ASSIGNMENT) {
         if (parsedCommand.argv.size() != 1) {
-            throw std::logic_error(
+            throw SyntaxError(
                       "internal error: argv must be empty for assignment"
                   );
         }
@@ -73,7 +73,7 @@ Command ParseCommand::parse(Command shellCommand) {
         }
 
         if (!isValidVarName(parsedCommand.identifier)) {
-            throw std::invalid_argument(
+            throw SyntaxError(
                  "export: `" + parsedCommand.identifier  +
                  "': not a valid identifier"
              );
@@ -141,7 +141,7 @@ std::string ParseCommand::classifyStdInput(Command command) {
         if (w.context == Word::UN_QUOTE && w.lexeme == "<") {
 
             if (i + 1 >= command.wordStream.size()) {
-                throw std::invalid_argument(
+                throw SyntaxError(
                     "syntax error near unexpected token `<'"
                 );
             }
@@ -150,7 +150,7 @@ std::string ParseCommand::classifyStdInput(Command command) {
 
             if (next.lexeme == "<" || next.lexeme == ">" ||
                 next.lexeme == "|" || next.lexeme == ";") {
-                throw std::invalid_argument(
+                throw SyntaxError(
                     "syntax error near unexpected token `<'"
                 );
                 }
@@ -172,7 +172,7 @@ std::string ParseCommand::classifyStdOutput(Command command) {
         if (w.context == Word::UN_QUOTE && w.lexeme == ">") {
 
             if (i + 1 >= command.wordStream.size()) {
-                throw std::invalid_argument(
+                throw SyntaxError(
                     "syntax error near unexpected token `>'"
                 );
             }
@@ -181,7 +181,7 @@ std::string ParseCommand::classifyStdOutput(Command command) {
 
             if (next.lexeme == "<" || next.lexeme == ">" ||
                 next.lexeme == "|" || next.lexeme == ";") {
-                throw std::invalid_argument(
+                throw SyntaxError(
                     "syntax error near unexpected token `>'"
                 );
                 }

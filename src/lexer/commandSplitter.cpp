@@ -5,6 +5,7 @@
 #include  "commandSplitter.h"
 
 #include "../util/stringUtil.h"
+#include "../util/error/syntaxError.h"
 
 char CommandSplitter::peek() {
     if (lookAheadIndex >= rawShellCommand.size()) {
@@ -44,10 +45,8 @@ std::vector<std::variant<Command, Pipe> > CommandSplitter::commandStream(std::st
             if (prevSplitter !=  ' ') {
                 if (getSplitterPresedence(prevSplitter) == getSplitterPresedence(currentSplitter) &&
                     (currentSplitter == '|' || prevSplitter == '|')) {
-                    throw std::invalid_argument(
-                        std::string("syntax error: unexpected consecutive operator `") +
-                        prevSplitter + currentSplitter + "`"
-                    );
+                    throw SyntaxError(std::string("syntax error: unexpected consecutive operator `") +
+                        prevSplitter + currentSplitter + "`");
                 }
             }
 
@@ -196,10 +195,9 @@ std::string CommandSplitter::processDoubleQuote() {
         }
     }
 
-    throw std::invalid_argument(
-        "syntax error: unterminated double quote (\") at position " +
-        std::to_string(lookAheadIndex)
-    );
+    throw SyntaxError("syntax error: unterminated double quote (\") at position " +
+        std::to_string(lookAheadIndex));
+
 }
 
 std::string CommandSplitter::processSingleQuote() {
@@ -217,9 +215,9 @@ std::string CommandSplitter::processSingleQuote() {
         move(); // consume char
     }
 
-    throw std::invalid_argument(
-    "syntax error: unterminated single quote (\') at position " +
+    throw SyntaxError("syntax error: unterminated single quote (\') at position " +
     std::to_string(lookAheadIndex));
+
 }
 
 std::string CommandSplitter::processBackTick() {
@@ -237,9 +235,9 @@ std::string CommandSplitter::processBackTick() {
         move(); // consume char
     }
 
-    throw std::invalid_argument(
-    "syntax error: unterminated single quote (`) at position " +
+    throw SyntaxError("syntax error: unterminated single quote (`) at position " +
     std::to_string(lookAheadIndex));
+
 }
 
 std::string CommandSplitter::processUnquoted() {

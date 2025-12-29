@@ -17,27 +17,56 @@
 #include "../process/spawn.h"
 #include "../util/env.h"
 #include "../util/error/executionError.h"
+#include "../util/error/incompleteInput.h"
+#include "../util/error/syntaxError.h"
 
 EngineResponse Engine::handleUserInput(std::string rawUserInput) {
     EngineResponse response;
-    rawUserInput = StringUtil::trim(rawUserInput); // normalize
-    CommandSplitter command_splitter;
-    std::vector<std::variant<Command, Pipe>> commands = command_splitter.commandStream(rawUserInput);
+    try {
+        rawUserInput = StringUtil::trim(rawUserInput); // normalize
+        CommandSplitter command_splitter;
+        std::vector<std::variant<Command, Pipe>> commands = command_splitter.commandStream(rawUserInput);
 
-    for (int i = 0 ; i < commands.size(); i++) {
-        auto* cmdPtr  = std::get_if<Command>(&commands[i]);
-        auto* pipePtr = std::get_if<Pipe>(&commands[i]);
-        if (pipePtr != nullptr) {
-            Pipe pipe = *pipePtr;
-            response = executePipe(pipe);
+        for (int i = 0 ; i < commands.size(); i++) {
+            auto* cmdPtr  = std::get_if<Command>(&commands[i]);
+            auto* pipePtr = std::get_if<Pipe>(&commands[i]);
+            if (pipePtr != nullptr) {
+                Pipe pipe = *pipePtr;
+                response = executePipe(pipe);
+            }
+            if (cmdPtr != nullptr) {
+                Command shellCommand = *cmdPtr;
+                response = executeCommand(shellCommand);
+            }
         }
-        if (cmdPtr != nullptr) {
-            Command shellCommand = *cmdPtr;
-            response = executeCommand(shellCommand);
-        }
+
+        return response;
+    }catch (SyntaxError ex) {
+        response.errorMessage = ex.what();
+        response.success = false;
+        return response;
     }
-
-    return response;
+    catch (IncompleteInput ex) {
+        response.errorMessage = ex.what();
+        response.success = false;
+        response.interactiveContinue = true;
+        return response;
+    }
+    catch (ExecutionError ex) {
+        response.errorMessage = ex.what();
+        response.success = false;
+        return response;
+    }
+    catch (const std::exception& ex) {
+        response.errorMessage = ex.what();
+        response.success = false;
+        return response;
+    }
+    catch (...) {
+        response.errorMessage = "unknown internal error";
+        response.success = false;
+        return response;
+    }
 }
 
 EngineResponse Engine::executePipe(Pipe pipe) {

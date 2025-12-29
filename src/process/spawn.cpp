@@ -372,6 +372,12 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipe) {
 std::string Spawn::resolveExecutablePath(std::string programName) {
     std::string resolvedPath;
     Env* env = Env::getInstance();
+
+    if (env->PATH_CACHE.find(programName) != env->PATH_CACHE.end()) {
+        resolvedPath = env->PATH_CACHE[programName];
+        return resolvedPath;
+    }
+
     std::string PATH_variable = env->getEnv("PATH").value;
     if (PATH_variable.empty()) {
         // use default path
@@ -393,6 +399,10 @@ std::string Spawn::resolveExecutablePath(std::string programName) {
             resolvedPath = absolutePath;
             break;
         }
+    }
+
+    if (!resolvedPath.empty()) {
+        env->PATH_CACHE[programName] = resolvedPath;
     }
 
     return  resolvedPath;

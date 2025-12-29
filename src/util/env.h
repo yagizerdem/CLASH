@@ -35,6 +35,7 @@ public:
     }
 
     std::unordered_map<std::string, Variable> environment_variables;
+    std::unordered_map<std::string, std::string> PATH_CACHE;
 
     void loadEnvp(char* envp[]);
 

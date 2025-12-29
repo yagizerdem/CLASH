@@ -9,21 +9,35 @@
 #include <vector>
 
 #include "engine.h"
+#include "../util/env.h"
 
 
 void REPL::loop() {
     std::string line;
     std::pmr::vector<std::string> args;
-    int status;
+    Env *env = Env::getInstance();
+    bool flag = false;
 
     do {
+        std::cout << "CWD : ( "  << env->getCwd() << " )" << std::endl;
+
         printf("> ");
         line = lsh_read_line();
         Engine engine;
-        engine.handleUserInput(line);
+        EngineResponse response =  engine.handleUserInput(line);
 
+        if (response.success && !response.payload.empty()) {
+            std::cout << response.payload << std::endl;
+        }
 
-    } while (status);
+        if (!response.success && !response.errorMessage.empty()) {
+            std::cout << response.errorMessage << std::endl;
+        }
+
+        env->setEnv("?", std::to_string(response.lastCommandExitStatus));
+        flag = response.terminate;
+
+    } while (!flag);
 }
 
 std::string REPL::lsh_read_line() {

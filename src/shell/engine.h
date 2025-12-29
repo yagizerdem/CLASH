@@ -7,15 +7,26 @@
 #include <string>
 
 #include "../util/model/command.h"
+#include "../util/model/engineResponse.h"
 #include "../util/model/pipe.h"
+#include "../util/model/executeProcessResult.h"
 
 
 class Engine {
 public:
-    void handleUserInput(std::string rawUserInput);
+    EngineResponse handleUserInput(std::string rawUserInput);
 private:
-    void executeCommand(Command shellCommand);
-    void executePipe(Pipe pipe);
+    // abstraction  layer over process
+    EngineResponse executeCommand(Command command);
+    EngineResponse executePipe(Pipe pipe);
+
+    // process
+    ExecuteProcessResult executeProcess(Command shellCommand);
+    ExecuteProcessResult executePipeProcess(Pipe pipe);
+
+    // built ins
+    void exitCLASH(Command command);
+    void assignment(Command command);
 };
 
 

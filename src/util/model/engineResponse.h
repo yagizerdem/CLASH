@@ -1,0 +1,17 @@
+//
+// Created by pennywise on 12/29/25.
+//
+
+#ifndef CLASH_ENGINERESPONSE_H
+#define CLASH_ENGINERESPONSE_H
+
+class  EngineResponse {
+public:
+    std::string payload;
+    std::string errorMessage;
+    bool success;
+    int lastCommandExitStatus;
+    bool terminate;
+};
+
+#endif //CLASH_ENGINERESPONSE_H

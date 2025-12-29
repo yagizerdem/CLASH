@@ -57,12 +57,18 @@ std::string LTR_scanner::singlePass(std::string rawShellCommand, std::unordered_
             lookAheadIndex += collect_word_result.word.length();
         }
 
-        if (collect_word_result.context == LTR_scanner::UNQUOTE ||
-                collect_word_result.context == LTR_scanner::BACKTICK) {
+        if (collect_word_result.context == LTR_scanner::UNQUOTE) {
             std::string expanded_word = expand(collect_word_result.word, env);
             expanded += expanded_word;
             lookAheadIndex += collect_word_result.word.length();
         }
+
+        if ( collect_word_result.context == LTR_scanner::BACKTICK) {
+            std::string expanded_word = expand(collect_word_result.word, env);
+            expanded += expanded_word;
+            lookAheadIndex += collect_word_result.word.length();
+        }
+
     }
 
 

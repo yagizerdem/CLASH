@@ -17,6 +17,9 @@ public:
 
     std::string lexeme;
     WordContext context;
+
+    bool hasQuotedGlobChar = false;
+    bool hasEscapedGlobChar = false;
 };
 
 #endif //CLASH_WORD_H

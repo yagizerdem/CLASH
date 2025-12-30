@@ -15,6 +15,8 @@ public:
 private:
     Word::WordContext getWordContext(std::string word);
     std::string normalizeWord(std::string word);
+    bool hasEscapedGlobChar(std::string rawWord);
+    bool hasQuotedGlobChar(std::string rawWord);
 };
 
 

@@ -47,6 +47,8 @@ std::vector<Word> WordSplitter::wordStream(std::string shellCommand) {
                 else {
                     if (newWord.context != Word::UN_QUOTE) {
                         newWord.context = getWordContext(currentWord); // get context by not normalized form !
+                        newWord.hasEscapedGlobChar = hasEscapedGlobChar(currentWord);
+                        newWord.hasQuotedGlobChar = hasQuotedGlobChar(currentWord);
                         result.push_back(newWord);
                     }
                 }
@@ -95,4 +97,41 @@ std::string WordSplitter::normalizeWord(std::string word) {
     };
 
     return word;  // unquoted or fallback
+}
+
+bool WordSplitter::hasEscapedGlobChar(std::string rawWord) {
+    for (int i = 0; i < rawWord.length(); i++) {
+        if ((rawWord[i] == '*' || rawWord[i] == '?' || rawWord[i] == '[')
+            && StringUtil::isEscapedCharacter(i, rawWord)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool WordSplitter::hasQuotedGlobChar(const std::string rawWord) {
+    Word::WordContext ctx = Word::UN_QUOTE;
+
+    for (int i = 0; i < rawWord.length(); i++) {
+        char c = rawWord[i];
+
+        if (c == '\'' && !StringUtil::isEscapedCharacter(i, rawWord)) {
+            if (ctx == Word::UN_QUOTE) ctx = Word::SINGLE_QUOTE;
+            else if (ctx == Word::SINGLE_QUOTE) ctx = Word::UN_QUOTE;
+            continue;
+        }
+
+        if (c == '"' && !StringUtil::isEscapedCharacter(i, rawWord)) {
+            if (ctx == Word::UN_QUOTE) ctx = Word::DOUBLE_QUOTE;
+            else if (ctx == Word::DOUBLE_QUOTE) ctx = Word::UN_QUOTE;
+            continue;
+        }
+
+        if (ctx != Word::UN_QUOTE &&
+            (c == '*' || c == '?' || c == '[')) {
+            return true;
+            }
+    }
+
+    return false;
 }

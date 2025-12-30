@@ -1,7 +1,4 @@
-add_executable(CLASH main.cpp
-        util/model/engineResponse.h
-        util/model/argvWrapper.h
-        util/model/redirectionWrapper.h)
+add_executable(CLASH main.cpp)
 
 
 file(GLOB_RECURSE util CONFIGURE_DEPENDS ./util/*.cpp ./util/*.h)
@@ -15,9 +12,7 @@ file(GLOB_RECURSE shell CONFIGURE_DEPENDS ./shell/*.cpp ./shell/*.h)
 #libraries
 add_library(utilLib STATIC ${util})
 add_library(processLib STATIC ${process})
-add_library(expandLib STATIC ${expand}
-        expand/glob_expansion.cpp
-        expand/glob_expansion.h)
+add_library(expandLib STATIC ${expand})
 add_library(lexerLib STATIC ${lexer})
 add_library(parserLib STATIC ${parser})
 add_library(shellLib STATIC ${shell})

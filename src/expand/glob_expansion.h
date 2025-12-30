@@ -11,8 +11,7 @@
 
 class GlobExpansion {
 public:
-    std::vector<Word> expand(std::vector<Word> wordStream);
-    bool shouldGlob(Word word);
+    std::vector<Word> expandArgv(std::vector<std::string> argv);
 };
 
 

@@ -16,6 +16,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <unistd.h>
 
 void Shell::start(int argc, char *argv[]) {
     Env* env = Env::getInstance();
@@ -42,8 +43,35 @@ void Shell::runInteractiveMode() {
     env->setEnv("*", "");
     env->setEnv("#", "0");
 
-    REPL repl;
-    repl.loop();
+    // check std input source is terminal or redirected from other source
+    int std_in_fd;
+    bool isTerminal = isatty(STDIN_FILENO) == 1;
+
+    if (isTerminal) {
+        REPL repl;
+        repl.loop();
+    }
+    else {
+        std::ostringstream ss;
+        ss << std::cin.rdbuf();
+
+        std::string userInput = ss.str();
+
+        Engine engine;
+        EngineResponse response =   engine.handleUserInput(userInput);
+
+        if (response.success && !response.payload.empty()) {
+            for (int i = 0; i < response.payload.size(); ++i) {
+                std::cout << response.payload[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+
+        if (!response.success && !response.errorMessage.empty()) {
+            std::cout << response.errorMessage << std::endl;
+        }
+    }
+
 }
 
 void Shell::runArgvMode(int argc, char *argv[]) {

@@ -1,0 +1,5 @@
+if(EXISTS "/home/pennywise/Desktop/CLASH/build/test/parseCommandTest[1]_tests.cmake")
+  include("/home/pennywise/Desktop/CLASH/build/test/parseCommandTest[1]_tests.cmake")
+else()
+  add_test(parseCommandTest_NOT_BUILT parseCommandTest_NOT_BUILT)
+endif()

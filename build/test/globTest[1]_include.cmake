@@ -1,0 +1,5 @@
+if(EXISTS "/home/pennywise/Desktop/CLASH/build/test/globTest[1]_tests.cmake")
+  include("/home/pennywise/Desktop/CLASH/build/test/globTest[1]_tests.cmake")
+else()
+  add_test(globTest_NOT_BUILT globTest_NOT_BUILT)
+endif()

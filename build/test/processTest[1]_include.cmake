@@ -1,0 +1,5 @@
+if(EXISTS "/home/pennywise/Desktop/CLASH/build/test/processTest[1]_tests.cmake")
+  include("/home/pennywise/Desktop/CLASH/build/test/processTest[1]_tests.cmake")
+else()
+  add_test(processTest_NOT_BUILT processTest_NOT_BUILT)
+endif()

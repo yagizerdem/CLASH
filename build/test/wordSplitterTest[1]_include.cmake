@@ -1,0 +1,5 @@
+if(EXISTS "/home/pennywise/Desktop/CLASH/build/test/wordSplitterTest[1]_tests.cmake")
+  include("/home/pennywise/Desktop/CLASH/build/test/wordSplitterTest[1]_tests.cmake")
+else()
+  add_test(wordSplitterTest_NOT_BUILT wordSplitterTest_NOT_BUILT)
+endif()

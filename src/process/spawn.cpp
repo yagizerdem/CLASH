@@ -49,7 +49,7 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<cha
     if (pipe(stdOutPipe) < 0 || pipe(stdErrPipe) < 0)
         exit(EXIT_FAILURE);
 
-    std::string programName = shellCommand.argv[0];
+    std::string programName = shellCommand.argv[0].lexeme;
 
     pid_t c_pid = fork();
     if (c_pid == -1) {
@@ -63,15 +63,15 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<cha
         close(stdOutPipe[0]);
         close(stdErrPipe[0]);
 
-        if (!shellCommand.redirectStandartOutput.empty()) {
+        if (!shellCommand.redirectStandartOutput.lexeme.empty()) {
             int fd = open(
-                shellCommand.redirectStandartOutput.c_str(),
+                shellCommand.redirectStandartOutput.lexeme.c_str(),
                 O_WRONLY | O_CREAT | O_TRUNC,
                 0644
             );
 
             if (fd < 0) {
-                perror(shellCommand.redirectStandartOutput.c_str());
+                perror(shellCommand.redirectStandartOutput.lexeme.c_str());
                 _exit(1);
             }
 
@@ -83,14 +83,14 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<cha
             close(stdOutPipe[1]);
         }
 
-        if (!shellCommand.redirectStandartInput.empty()) {
+        if (!shellCommand.redirectStandartInput.lexeme.empty()) {
             int fd = open(
-                shellCommand.redirectStandartInput.c_str(),
+                shellCommand.redirectStandartInput.lexeme.c_str(),
                 O_RDONLY
             );
 
             if (fd < 0) {
-                perror(shellCommand.redirectStandartInput.c_str());
+                perror(shellCommand.redirectStandartInput.lexeme.c_str());
                 _exit(1);
             }
 
@@ -101,10 +101,10 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<cha
         dup2(stdErrPipe[1], STDERR_FILENO);
         close(stdErrPipe[1]);
 
-        std::string executablePath = resolveExecutablePath(shellCommand.argv[0]);
+        std::string executablePath = resolveExecutablePath(shellCommand.argv[0].lexeme);
 
         if (executablePath.empty()) {
-            std::cerr <<  shellCommand.argv[0] << " executable not found" << std::endl;
+            std::cerr <<  shellCommand.argv[0].lexeme << " executable not found" << std::endl;
             _exit(127);
         }
 
@@ -185,7 +185,7 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
     int n = 0;
     for (int i = 0; i < pipeModel.commands.size(); i++) {
         n++;
-        if (!pipeModel.commands[i].redirectStandartOutput.empty())
+        if (!pipeModel.commands[i].redirectStandartOutput.lexeme.empty())
             break;
     }
 
@@ -216,14 +216,14 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
         if (pid == 0) {
             Command shellCommand = pipeModel.commands[i];
 
-            if (!shellCommand.redirectStandartInput.empty()) {
+            if (!shellCommand.redirectStandartInput.lexeme.empty()) {
                 int fd = open(
-                            shellCommand.redirectStandartInput.c_str(),
+                            shellCommand.redirectStandartInput.lexeme.c_str(),
                             O_RDONLY
                         );
 
                 if (fd < 0) {
-                    perror(shellCommand.redirectStandartInput.c_str());
+                    perror(shellCommand.redirectStandartInput.lexeme.c_str());
                     _exit(1);
                 }
 
@@ -238,15 +238,15 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
                 // default fallback is terminal
             }
 
-            if (!shellCommand.redirectStandartOutput.empty()) {
+            if (!shellCommand.redirectStandartOutput.lexeme.empty()) {
                 int fd = open(
-                                shellCommand.redirectStandartOutput.c_str(),
+                                shellCommand.redirectStandartOutput.lexeme.c_str(),
                                 O_WRONLY | O_CREAT | O_TRUNC,
                                 0644
                             );
 
                 if (fd < 0) {
-                    perror(shellCommand.redirectStandartOutput.c_str());
+                    perror(shellCommand.redirectStandartOutput.lexeme.c_str());
                     _exit(1);
                 }
 
@@ -267,10 +267,10 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
                 close(errPipes[j][1]);
             }
 
-            std::string exe = resolveExecutablePath(shellCommand.argv[0]);
+            std::string exe = resolveExecutablePath(shellCommand.argv[0].lexeme);
 
             if (exe.empty()) {
-                std::cerr << shellCommand.argv[0]
+                std::cerr << shellCommand.argv[0].lexeme
                           << ": command not found\n";
                 _exit(127);
             }

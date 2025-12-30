@@ -1,5 +1,7 @@
 add_executable(CLASH main.cpp
-        util/model/engineResponse.h)
+        util/model/engineResponse.h
+        util/model/argvWrapper.h
+        util/model/redirectionWrapper.h)
 
 
 file(GLOB_RECURSE util CONFIGURE_DEPENDS ./util/*.cpp ./util/*.h)

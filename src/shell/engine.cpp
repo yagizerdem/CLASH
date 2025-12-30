@@ -172,7 +172,7 @@ ExecuteProcessResult Engine::executePipeProcess(Pipe pipe) {
 
 
 void Engine::exitCLASH(Command command) {
-    std::string exit_status = command.argv[1];
+    std::string exit_status = command.argv[1].lexeme;
     exit(stoi(exit_status));
 }
 
@@ -184,14 +184,14 @@ void Engine::assignment(Command command) {
 void Engine::unset(Command command) {
     Env *env = Env::getInstance();
     for (int i = 1 ; i < command.argv.size() ; i++) {
-        env->unsetEnv(command.argv[i]);
+        env->unsetEnv(command.argv[i].lexeme);
     }
 }
 
 void Engine::exportBuiltIn(Command command) {
     Env *env = Env::getInstance();
     for (int i = 1 ; i < command.argv.size() ; i++) {
-        env->exportEnv(command.argv[i]);
+        env->exportEnv(command.argv[i].lexeme);
     }
 }
 
@@ -199,7 +199,7 @@ void Engine::cd(Command command) {
     Env *env = Env::getInstance();
     std::string path;
 
-    if (command.argv.size() < 2 || command.argv[1].empty()) {
+    if (command.argv.size() < 2 || command.argv[1].lexeme.empty()) {
         auto home = env->getEnv("HOME");
         if (home.value.empty()) {
             std::cerr << "cd: HOME not set\n";
@@ -208,7 +208,7 @@ void Engine::cd(Command command) {
         path = home.value;
     }
     else {
-        path = command.argv[1];
+        path = command.argv[1].lexeme;
     }
 
     if (path == ".") {

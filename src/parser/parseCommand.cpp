@@ -31,8 +31,8 @@ Command ParseCommand::parse(Command shellCommand) {
 
     if (parsedCommand.commandType == Command::UNSET) {
         for (size_t i = 1; i < parsedCommand.argv.size(); ++i) {
-            if (!isValidVarName(parsedCommand.argv[i])) {
-                throw SyntaxError(   "unset: `" + parsedCommand.argv[i] +
+            if (!isValidVarName(parsedCommand.argv[i].lexeme)) {
+                throw SyntaxError(   "unset: `" + parsedCommand.argv[i].lexeme +
                     "': not a valid identifier");
             }
         }
@@ -40,9 +40,9 @@ Command ParseCommand::parse(Command shellCommand) {
 
     if (parsedCommand.commandType == Command::EXPORT) {
         for (size_t i = 1; i < parsedCommand.argv.size(); ++i) {
-            if (!isValidVarName(parsedCommand.argv[i])) {
+            if (!isValidVarName(parsedCommand.argv[i].lexeme)) {
                 throw SyntaxError(
-                    "export: `" + parsedCommand.argv[i]  +
+                    "export: `" + parsedCommand.argv[i].lexeme  +
                     "': not a valid identifier"
                 );
             }
@@ -62,7 +62,7 @@ Command ParseCommand::parse(Command shellCommand) {
                   );
         }
         int i = 0;
-        std::string statement = parsedCommand.argv[i];
+        std::string statement = parsedCommand.argv[i].lexeme;
         while (i < statement.size()) {
             if (statement[i] == '=') {
                 i++; // skip =
@@ -132,11 +132,11 @@ bool ParseCommand::isBuiltInCommand(Command::CommandType type) {
             type == Command::CommandType::EXPORT;
 }
 
-std::string ParseCommand::classifyStdInput(Command command) {
-    std::string last;
+RedirectionWrapper ParseCommand::classifyStdInput(Command command) {
+    RedirectionWrapper last_redirection;
 
     for (size_t i = 0; i < command.wordStream.size(); ++i) {
-        const Word& w = command.wordStream[i];
+        Word w = command.wordStream[i];
 
         if (w.context == Word::UN_QUOTE && w.lexeme == "<") {
 
@@ -155,19 +155,20 @@ std::string ParseCommand::classifyStdInput(Command command) {
                 );
                 }
 
-            last = next.lexeme;
+            last_redirection.lexeme = next.lexeme;
+            last_redirection.word =w;
             ++i;
         }
     }
 
-    return last;
+    return last_redirection;
 }
 
-std::string ParseCommand::classifyStdOutput(Command command) {
-    std::string last;
+RedirectionWrapper ParseCommand::classifyStdOutput(Command command) {
+    RedirectionWrapper last_redirection;
 
     for (size_t i = 0; i < command.wordStream.size(); ++i) {
-        const Word& w = command.wordStream[i];
+        Word w = command.wordStream[i];
 
         if (w.context == Word::UN_QUOTE && w.lexeme == ">") {
 
@@ -186,19 +187,20 @@ std::string ParseCommand::classifyStdOutput(Command command) {
                 );
                 }
 
-            last = next.lexeme;
+            last_redirection.lexeme = next.lexeme;
+            last_redirection.word = w;
             ++i;
         }
     }
 
-    return last;
+    return last_redirection;
 }
 
-std::vector<std::string> ParseCommand::classifyArgv(Command command) {
-    std::vector<std::string> argv;
+std::vector<ArgvWrapper> ParseCommand::classifyArgv(Command command) {
+    std::vector<ArgvWrapper> argv_wrapper;
 
     for (size_t i = 0; i < command.wordStream.size(); ++i) {
-        const Word& w = command.wordStream[i];
+        Word w = command.wordStream[i];
 
         if (w.context == Word::UN_QUOTE &&
             (w.lexeme == "<" || w.lexeme == ">")) {
@@ -206,10 +208,14 @@ std::vector<std::string> ParseCommand::classifyArgv(Command command) {
             continue;
             }
 
-        argv.push_back(w.lexeme);
+        ArgvWrapper argv;
+        argv.lexeme = w.lexeme;
+        argv.word = w;
+
+        argv_wrapper.push_back(argv);
     }
 
-    return argv;
+    return argv_wrapper;
 }
 
 

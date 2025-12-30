@@ -7,8 +7,14 @@
 #include "glob.h"
 #include "../util/env.h"
 
-std::vector<Word> GlobExpansion::expandArgv(std::vector<std::string> argv) {
+std::vector<std::string> GlobExpansion::expandArgv(std::vector<std::string> argv) {
+    std::vector<std::string> result;
 
+    for (int  i = 0; i < argv.size(); i++) {
+
+    }
+
+    return result;
 }
 
 

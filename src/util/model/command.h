@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "argvWrapper.h"
+#include "redirectionWrapper.h"
 #include "word.h"
 #include "../stringUtil.h"
 
@@ -29,9 +31,9 @@ public:
     std::vector<Word> wordStream;
 
     // parse part + syntax checking
-    std::vector<std::string> argv;
-    std::string redirectStandartInput; // file name for stdin
-    std::string redirectStandartOutput; // file name for stdout
+    std::vector<ArgvWrapper> argv;
+    RedirectionWrapper redirectStandartInput; // file name for stdin
+    RedirectionWrapper redirectStandartOutput; // file name for stdout
     CommandType commandType;
     // useful properties for assignment
     std::string identifier;
@@ -40,7 +42,7 @@ public:
     std::vector<char*> toExecveArgv() {
         std::vector<char*> execveArgv;
         for (int i = 0; i < argv.size(); i++) {
-            char* p = const_cast<char*>(argv[i].c_str());
+            char* p = const_cast<char*>(argv[i].lexeme.c_str());
             execveArgv.push_back(p);
         }
         execveArgv.push_back(nullptr);

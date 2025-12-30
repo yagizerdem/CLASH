@@ -14,9 +14,9 @@ public:
 
 private:
     Command::CommandType classifyCommand(Command command);
-    std::string classifyStdInput(Command command);
-    std::string classifyStdOutput(Command command);
-    std::vector<std::string> classifyArgv(Command command);
+    RedirectionWrapper classifyStdInput(Command command);
+    RedirectionWrapper classifyStdOutput(Command command);
+    std::vector<ArgvWrapper> classifyArgv(Command command);
     bool isValidVarName(const std::string& name);
     bool isBuiltInCommand(Command::CommandType type);
 };

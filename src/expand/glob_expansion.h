@@ -11,7 +11,8 @@
 
 class GlobExpansion {
 public:
-    std::vector<Word> expandArgv(std::vector<std::string> argv);
+    std::vector<std::string> expandArgv(std::vector<std::string> argv);
+    std::string expandRedirection(std::string redirection);
 };
 
 

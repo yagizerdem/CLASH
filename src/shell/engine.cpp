@@ -9,6 +9,7 @@
 #include <ostream>
 #include <unistd.h>
 
+#include "../expand/glob_expansion.h"
 #include "../expand/ltr_scanner.h"
 #include "../expand/tilde.h"
 #include "../lexer/commandSplitter.h"
@@ -78,6 +79,7 @@ EngineResponse Engine::executePipe(Pipe pipe) {
         Tilde tildeSubstitution;
         LTR_scanner ltr_scanner;
         ParseCommand parse_command;
+        GlobExpansion glob_expansion;
 
         Command shellCommand = pipe.commands[i];
         shellCommand.rawShellCommand = tildeSubstitution.expandTilde(shellCommand.rawShellCommand);
@@ -85,6 +87,9 @@ EngineResponse Engine::executePipe(Pipe pipe) {
 
         shellCommand.wordStream = word_splitter.wordStream(shellCommand.rawShellCommand);
         shellCommand = parse_command.parse(shellCommand);
+        shellCommand.redirectStandartInput = glob_expansion.expandRedirection(shellCommand.redirectStandartInput);
+        shellCommand.redirectStandartOutput = glob_expansion.expandRedirection(shellCommand.redirectStandartOutput);
+        shellCommand.argv = glob_expansion.expandArgv(shellCommand.argv);
 
         pipe.commands[i] = shellCommand;
     }
@@ -106,6 +111,7 @@ EngineResponse Engine::executeCommand(Command command) {
     Tilde tildeSubstitution;
     LTR_scanner ltr_scanner;
     ParseCommand parse_command;
+    GlobExpansion glob_expansion;
 
 
     command.rawShellCommand = tildeSubstitution.expandTilde(command.rawShellCommand);
@@ -113,6 +119,9 @@ EngineResponse Engine::executeCommand(Command command) {
 
     command.wordStream = word_splitter.wordStream(command.rawShellCommand);
     command = parse_command.parse(command);
+    command.redirectStandartInput = glob_expansion.expandRedirection(command.redirectStandartInput);
+    command.redirectStandartOutput = glob_expansion.expandRedirection(command.redirectStandartOutput);
+    command.argv = glob_expansion.expandArgv(command.argv);
 
     if (command.commandType == Command::EXECUTABLE_COMMAND) {
         ExecuteProcessResult result = executeProcess(command);

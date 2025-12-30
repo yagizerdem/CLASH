@@ -6,13 +6,15 @@
 #define CLASH_GLOB_EXPANSION_H
 #include <vector>
 
+#include "../util/model/argvWrapper.h"
+#include "../util/model/redirectionWrapper.h"
 #include "../util/model/word.h"
 
 
 class GlobExpansion {
 public:
-    std::vector<std::string> expandArgv(std::vector<std::string> argv);
-    std::string expandRedirection(std::string redirection);
+    std::vector<ArgvWrapper> expandArgv(std::vector<ArgvWrapper> argv);
+    RedirectionWrapper expandRedirection(RedirectionWrapper redirection);
 };
 
 

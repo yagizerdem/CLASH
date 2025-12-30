@@ -352,7 +352,7 @@ std::vector<std::string> Glob::getAllFilesUnderPath(const std::string path) {
     }
 
     for (const auto& entry : it) {
-        if (entry.is_regular_file(ec) && !ec) {
+        if (!ec && (entry.is_regular_file(ec) || entry.is_directory(ec))) {
             result.push_back(entry.path().filename().string());
         }
     }

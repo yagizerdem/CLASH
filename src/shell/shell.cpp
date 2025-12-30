@@ -64,7 +64,18 @@ void Shell::runArgvMode(int argc, char *argv[]) {
             std ::string rawUserInput = readAllText(fileName);
             rawUserInput = StringUtil::trim(rawUserInput); // normalize
             Engine engine;
-            engine.handleUserInput(rawUserInput);
+            EngineResponse response =  engine.handleUserInput(rawUserInput);
+
+            if (response.success && !response.payload.empty()) {
+                for (int i = 0; i < response.payload.size(); ++i) {
+                    std::cout << response.payload[i] << " ";
+                }
+                std::cout << std::endl;
+            }
+
+            if (!response.success && !response.errorMessage.empty()) {
+                std::cout << response.errorMessage << std::endl;
+            }
         }
     }
     else if (argc >= 3 ) {
@@ -82,7 +93,18 @@ void Shell::runArgvMode(int argc, char *argv[]) {
 
         // execute raw shell command
         Engine engine;
-        engine.handleUserInput(shellCommand);
+        EngineResponse response =   engine.handleUserInput(shellCommand);
+
+        if (response.success && !response.payload.empty()) {
+            for (int i = 0; i < response.payload.size(); ++i) {
+                std::cout << response.payload[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+
+        if (!response.success && !response.errorMessage.empty()) {
+            std::cout << response.errorMessage << std::endl;
+        }
     }
 
 }
@@ -107,7 +129,19 @@ void Shell::runFileMode(int argc, char *argv[]) {
         std ::string rawUserInput = readAllText(fileName);
         rawUserInput = StringUtil::trim(rawUserInput); // normalize
         Engine engine;
-        engine.handleUserInput(rawUserInput);
+        EngineResponse response = engine.handleUserInput(rawUserInput);
+
+        if (response.success && !response.payload.empty()) {
+            for (int i = 0; i < response.payload.size(); ++i) {
+                std::cout << response.payload[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+
+        if (!response.success && !response.errorMessage.empty()) {
+            std::cout << response.errorMessage << std::endl;
+        }
+
     }
 }
 

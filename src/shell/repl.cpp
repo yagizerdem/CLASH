@@ -18,23 +18,22 @@ void REPL::loop() {
     Env *env = Env::getInstance();
     bool flag = false;
 
+
+
     do {
         std::cout << "CWD : ( "  << env->getCwd() << " )" << std::endl;
+         std::cout << "> " << std::endl;
 
-        printf("> ");
         line = lsh_read_line();
         Engine engine;
         EngineResponse response =  engine.handleUserInput(line);
 
-        if (response.success && !response.payload.empty()) {
-            for (int i = 0; i < response.payload.size(); ++i) {
-                std::cout << response.payload[i] << " ";
-            }
-            std::cout << std::endl;
+        for (const auto& line : response.stdoutPayload) {
+            if (!line.empty()) std::cout << line << std::endl;
         }
 
-        if (!response.success && !response.errorMessage.empty()) {
-            std::cout << response.errorMessage << std::endl;
+        for (const auto& line : response.stderrPayload) {
+            if (!line.empty()) std::cerr << line << std::endl;
         }
 
         flag = response.terminate;

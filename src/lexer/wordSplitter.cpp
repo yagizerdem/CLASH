@@ -39,7 +39,7 @@ std::vector<Word> WordSplitter::wordStream(std::string shellCommand) {
             if (lookAhead == ' ' || lookAhead == '\t' || lookAhead == '\n' || lookAhead == '\r') {
                 // break word
                 Word newWord;
-                newWord.lexeme = normalizeBackSlash(normalizeWord(currentWord));
+                newWord.lexeme = normalizeWord(normalizeBackSlash(currentWord));
                 newWord.context = getWordContext(currentWord); // get context by not normalized form !
 
 
@@ -74,7 +74,7 @@ std::vector<Word> WordSplitter::wordStream(std::string shellCommand) {
 
     if (!currentWord.empty()) {
         Word newWord;
-        newWord.lexeme = normalizeBackSlash(normalizeWord(currentWord));
+        newWord.lexeme = normalizeWord(normalizeBackSlash(currentWord));
         newWord.context = getWordContext(currentWord);
         newWord.hasEscapedGlobChar = hasEscapedGlobChar(currentWord);
         newWord.hasQuotedGlobChar = hasQuotedGlobChar(currentWord);
@@ -108,6 +108,13 @@ std::string WordSplitter::normalizeWord(std::string word) {
 
 std::string WordSplitter::normalizeBackSlash(std::string word) {
     std::string normalized;
+
+
+    if ((word[0]  == '"' && word[word.size() - 1] == '"') ||
+        (word[0]  == '\'' && word[word.size() - 1] == '\'')) {
+        return word;
+    }
+
 
     for (int i = 0; i < word.size(); i++) {
         if (word[i] == '\\' && StringUtil::isEscapedCharacter(i, word)) {

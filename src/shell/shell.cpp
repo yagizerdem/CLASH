@@ -60,15 +60,12 @@ void Shell::runInteractiveMode() {
         Engine engine;
         EngineResponse response =   engine.handleUserInput(userInput);
 
-        if (response.success && !response.payload.empty()) {
-            for (int i = 0; i < response.payload.size(); ++i) {
-                std::cout << response.payload[i] << " ";
-            }
-            std::cout << std::endl;
+        for (const auto& line : response.stdoutPayload) {
+            std::cout << line << '\n';
         }
 
-        if (!response.success && !response.errorMessage.empty()) {
-            std::cout << response.errorMessage << std::endl;
+        for (const auto& line : response.stderrPayload) {
+            std::cerr << line << '\n';
         }
     }
 
@@ -94,15 +91,12 @@ void Shell::runArgvMode(int argc, char *argv[]) {
             Engine engine;
             EngineResponse response =  engine.handleUserInput(rawUserInput);
 
-            if (response.success && !response.payload.empty()) {
-                for (int i = 0; i < response.payload.size(); ++i) {
-                    std::cout << response.payload[i] << " ";
-                }
-                std::cout << std::endl;
+            for (const auto& line : response.stdoutPayload) {
+                std::cout << line << '\n';
             }
 
-            if (!response.success && !response.errorMessage.empty()) {
-                std::cout << response.errorMessage << std::endl;
+            for (const auto& line : response.stderrPayload) {
+                std::cerr << line << '\n';
             }
         }
     }
@@ -123,15 +117,12 @@ void Shell::runArgvMode(int argc, char *argv[]) {
         Engine engine;
         EngineResponse response =   engine.handleUserInput(shellCommand);
 
-        if (response.success && !response.payload.empty()) {
-            for (int i = 0; i < response.payload.size(); ++i) {
-                std::cout << response.payload[i] << " ";
-            }
-            std::cout << std::endl;
+        for (const auto& line : response.stdoutPayload) {
+            std::cout << line << '\n';
         }
 
-        if (!response.success && !response.errorMessage.empty()) {
-            std::cout << response.errorMessage << std::endl;
+        for (const auto& line : response.stderrPayload) {
+            std::cerr << line << '\n';
         }
     }
 
@@ -159,15 +150,12 @@ void Shell::runFileMode(int argc, char *argv[]) {
         Engine engine;
         EngineResponse response = engine.handleUserInput(rawUserInput);
 
-        if (response.success && !response.payload.empty()) {
-            for (int i = 0; i < response.payload.size(); ++i) {
-                std::cout << response.payload[i] << " ";
-            }
-            std::cout << std::endl;
+        for (const auto& line : response.stdoutPayload) {
+            std::cout << line << '\n';
         }
 
-        if (!response.success && !response.errorMessage.empty()) {
-            std::cout << response.errorMessage << std::endl;
+        for (const auto& line : response.stderrPayload) {
+            std::cerr << line << '\n';
         }
 
     }

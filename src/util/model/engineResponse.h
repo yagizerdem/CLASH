@@ -7,8 +7,8 @@
 
 class  EngineResponse {
 public:
-    std::vector<std::string> payload;
-    std::string errorMessage;
+    std::vector<std::string> stdoutPayload;
+    std::vector<std::string> stderrPayload;
     bool success;
     int lastCommandExitStatus;
     bool terminate;

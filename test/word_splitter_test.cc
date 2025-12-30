@@ -361,7 +361,7 @@ TEST(WordSplitterTest, ComplexRealWorld1) {
     ASSERT_GE(word_stream.size(), 4);
     ASSERT_EQ(word_stream[0].lexeme, "grep");
     ASSERT_EQ(word_stream[1].lexeme, "-r");
-    ASSERT_EQ(word_stream[2].lexeme, "error|warning");
+    ASSERT_EQ(word_stream[2].lexeme, "error\\|warning");
     ASSERT_EQ(word_stream[2].context, Word::WordContext::SINGLE_QUOTE);
 }
 

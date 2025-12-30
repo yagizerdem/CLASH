@@ -36,9 +36,14 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
                 Pipe pipe = *pipePtr;
                 EngineResponse pipeResponse = executePipe(pipe);
 
-                response.payload.insert(response.payload.end(),
-                    pipeResponse.payload.begin(), pipeResponse.payload.end());
-                response.errorMessage = pipeResponse.errorMessage;
+                // std out
+                response.stdoutPayload.insert(response.stdoutPayload.end(),
+                    pipeResponse.stdoutPayload.begin(), pipeResponse.stdoutPayload.end());
+
+                // std err
+                response.stderrPayload.insert(response.stderrPayload.end(),
+                    pipeResponse.stderrPayload.begin(), pipeResponse.stderrPayload.end());
+
                 response.interactiveContinue = pipeResponse.interactiveContinue;
                 response.lastCommandExitStatus = pipeResponse.lastCommandExitStatus;
                 response.success = pipeResponse.success;
@@ -50,9 +55,14 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
                 Command shellCommand = *cmdPtr;
                 EngineResponse commandResponse = executeCommand(shellCommand);
 
-                response.payload.insert(response.payload.end(),
-                     commandResponse.payload.begin(), commandResponse.payload.end());
-                response.errorMessage = commandResponse.errorMessage;
+                // std out
+                response.stdoutPayload.insert(response.stdoutPayload.end(),
+                    commandResponse.stdoutPayload.begin(), commandResponse.stdoutPayload.end());
+
+                // std err
+                response.stderrPayload.insert(response.stderrPayload.end(),
+                    commandResponse.stderrPayload.begin(), commandResponse.stderrPayload.end());
+
                 response.interactiveContinue = commandResponse.interactiveContinue;
                 response.lastCommandExitStatus = commandResponse.lastCommandExitStatus;
                 response.success = commandResponse.success;
@@ -64,28 +74,28 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
 
         return response;
     }catch (SyntaxError ex) {
-        response.errorMessage = ex.what();
+        response.stderrPayload.push_back(ex.what());
         response.success = false;
         return response;
     }
     catch (IncompleteInput ex) {
-        response.errorMessage = ex.what();
+        response.stderrPayload.push_back(ex.what());
         response.success = false;
         response.interactiveContinue = true;
         return response;
     }
     catch (ExecutionError ex) {
-        response.errorMessage = ex.what();
+        response.stderrPayload.push_back(ex.what());
         response.success = false;
         return response;
     }
     catch (const std::exception& ex) {
-        response.errorMessage = ex.what();
+        response.stderrPayload.push_back(ex.what());
         response.success = false;
         return response;
     }
     catch (...) {
-        response.errorMessage = "unknown internal error";
+        response.stderrPayload.push_back("unknown internal error");
         response.success = false;
         return response;
     }
@@ -117,8 +127,8 @@ EngineResponse Engine::executePipe(Pipe pipe) {
 
     ExecuteProcessResult result = executePipeProcess(pipe);
 
-    response.errorMessage = result.stdErr;
-    response.payload.push_back(result.stdOut);
+    response.stderrPayload.push_back(result.stdErr);
+    response.stdoutPayload.push_back(result.stdOut);
     response.success = result.exitCode == 0;
     response.lastCommandExitStatus = result.exitCode;
 
@@ -147,8 +157,8 @@ EngineResponse Engine::executeCommand(Command command) {
     if (command.commandType == Command::EXECUTABLE_COMMAND) {
         ExecuteProcessResult result = executeProcess(command);
 
-        response.errorMessage = result.stdErr;
-        response.payload.push_back(result.stdOut);
+        response.stderrPayload.push_back(result.stdErr);
+        response.stdoutPayload.push_back(result.stdOut);
         response.success = result.exitCode == 0;
         response.lastCommandExitStatus = result.exitCode;
     }

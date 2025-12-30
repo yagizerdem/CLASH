@@ -88,9 +88,9 @@ std::vector<Word> WordSplitter::wordStream(std::string shellCommand) {
 
 Word::WordContext WordSplitter::getWordContext(std::string word) {
     if (word.size() < 2) return  Word::UN_QUOTE;
-    if (word[0] ==  '"' || word[word.size() -1] == '"') return Word::DOUBLE_QUOTE;
-    if (word[0] ==  '\'' || word[word.size() -1] == '\'') return Word::SINGLE_QUOTE;
-    if (word[0] ==  '`' || word[word.size() -1] == '`') return Word::BACK_TICK;
+    if (word[0] ==  '"' && word[word.size() -1] == '"') return Word::DOUBLE_QUOTE;
+    if (word[0] ==  '\'' && word[word.size() -1] == '\'') return Word::SINGLE_QUOTE;
+    if (word[0] ==  '`' && word[word.size() -1] == '`') return Word::BACK_TICK;
 
     return  Word::UN_QUOTE;
 }

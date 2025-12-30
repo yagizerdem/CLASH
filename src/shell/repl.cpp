@@ -37,7 +37,6 @@ void REPL::loop() {
             std::cout << response.errorMessage << std::endl;
         }
 
-        env->setEnv("?", std::to_string(response.lastCommandExitStatus));
         flag = response.terminate;
 
     } while (!flag);

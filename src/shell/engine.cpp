@@ -22,6 +22,7 @@
 #include "../util/error/syntaxError.h"
 
 EngineResponse Engine::handleUserInput(std::string rawUserInput) {
+    Env *env = Env::getInstance();
     EngineResponse response;
     try {
         rawUserInput = StringUtil::trim(rawUserInput); // normalize
@@ -42,6 +43,8 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
                 response.lastCommandExitStatus = pipeResponse.lastCommandExitStatus;
                 response.success = pipeResponse.success;
                 response.terminate = pipeResponse.terminate;
+
+                env->setEnv("?", std::to_string(response.lastCommandExitStatus));
             }
             if (cmdPtr != nullptr) {
                 Command shellCommand = *cmdPtr;
@@ -54,6 +57,8 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
                 response.lastCommandExitStatus = commandResponse.lastCommandExitStatus;
                 response.success = commandResponse.success;
                 response.terminate = commandResponse.terminate;
+
+                env->setEnv("?", std::to_string(response.lastCommandExitStatus));
             }
         }
 

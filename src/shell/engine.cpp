@@ -33,11 +33,27 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
             auto* pipePtr = std::get_if<Pipe>(&commands[i]);
             if (pipePtr != nullptr) {
                 Pipe pipe = *pipePtr;
-                response = executePipe(pipe);
+                EngineResponse pipeResponse = executePipe(pipe);
+
+                response.payload.insert(response.payload.end(),
+                    pipeResponse.payload.begin(), pipeResponse.payload.end());
+                response.errorMessage = pipeResponse.errorMessage;
+                response.interactiveContinue = pipeResponse.interactiveContinue;
+                response.lastCommandExitStatus = pipeResponse.lastCommandExitStatus;
+                response.success = pipeResponse.success;
+                response.terminate = pipeResponse.terminate;
             }
             if (cmdPtr != nullptr) {
                 Command shellCommand = *cmdPtr;
-                response = executeCommand(shellCommand);
+                EngineResponse commandResponse = executeCommand(shellCommand);
+
+                response.payload.insert(response.payload.end(),
+                     commandResponse.payload.begin(), commandResponse.payload.end());
+                response.errorMessage = commandResponse.errorMessage;
+                response.interactiveContinue = commandResponse.interactiveContinue;
+                response.lastCommandExitStatus = commandResponse.lastCommandExitStatus;
+                response.success = commandResponse.success;
+                response.terminate = commandResponse.terminate;
             }
         }
 
@@ -97,7 +113,7 @@ EngineResponse Engine::executePipe(Pipe pipe) {
     ExecuteProcessResult result = executePipeProcess(pipe);
 
     response.errorMessage = result.stdErr;
-    response.payload = result.stdOut;
+    response.payload.push_back(result.stdOut);
     response.success = result.exitCode == 0;
     response.lastCommandExitStatus = result.exitCode;
 
@@ -127,7 +143,7 @@ EngineResponse Engine::executeCommand(Command command) {
         ExecuteProcessResult result = executeProcess(command);
 
         response.errorMessage = result.stdErr;
-        response.payload = result.stdOut;
+        response.payload.push_back(result.stdOut);
         response.success = result.exitCode == 0;
         response.lastCommandExitStatus = result.exitCode;
     }

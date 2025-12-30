@@ -27,7 +27,10 @@ void REPL::loop() {
         EngineResponse response =  engine.handleUserInput(line);
 
         if (response.success && !response.payload.empty()) {
-            std::cout << response.payload << std::endl;
+            for (int i = 0; i < response.payload.size(); ++i) {
+                std::cout << response.payload[i] << " ";
+            }
+            std::cout << std::endl;
         }
 
         if (!response.success && !response.errorMessage.empty()) {

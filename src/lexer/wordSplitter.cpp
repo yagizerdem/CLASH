@@ -39,16 +39,25 @@ std::vector<Word> WordSplitter::wordStream(std::string shellCommand) {
             if (lookAhead == ' ' || lookAhead == '\t' || lookAhead == '\n' || lookAhead == '\r') {
                 // break word
                 Word newWord;
-                newWord.lexeme = normalizeWord(currentWord);
+                newWord.lexeme = normalizeBackSlash(normalizeWord(currentWord));
                 newWord.context = getWordContext(currentWord); // get context by not normalized form !
+
+
+                if (newWord.context == Word::UN_QUOTE) {
+                    newWord.hasEscapedGlobChar = hasEscapedGlobChar(currentWord);
+                    newWord.hasQuotedGlobChar = hasQuotedGlobChar(currentWord);
+                }
+                else {
+                    newWord.hasEscapedGlobChar = hasEscapedGlobChar(currentWord);
+                    newWord.hasQuotedGlobChar = true;
+                }
+
                 if (!newWord.lexeme.empty()) {
                     result.push_back(newWord);
                 }
                 else {
                     if (newWord.context != Word::UN_QUOTE) {
                         newWord.context = getWordContext(currentWord); // get context by not normalized form !
-                        newWord.hasEscapedGlobChar = hasEscapedGlobChar(currentWord);
-                        newWord.hasQuotedGlobChar = hasQuotedGlobChar(currentWord);
                         result.push_back(newWord);
                     }
                 }
@@ -57,12 +66,7 @@ std::vector<Word> WordSplitter::wordStream(std::string shellCommand) {
 
             }
             else {
-                if (lookAhead == '\\') {
-                    if (StringUtil::isEscapedCharacter(i, shellCommand)) currentWord += lookAhead;
-                }
-                else {
-                    currentWord += lookAhead;
-                }
+                currentWord += lookAhead;
             }
         }
 
@@ -70,8 +74,11 @@ std::vector<Word> WordSplitter::wordStream(std::string shellCommand) {
 
     if (!currentWord.empty()) {
         Word newWord;
-        newWord.lexeme = normalizeWord(currentWord);
+        newWord.lexeme = normalizeBackSlash(normalizeWord(currentWord));
         newWord.context = getWordContext(currentWord);
+        newWord.hasEscapedGlobChar = hasEscapedGlobChar(currentWord);
+        newWord.hasQuotedGlobChar = hasQuotedGlobChar(currentWord);
+
         result.push_back(newWord);
     }
 
@@ -97,6 +104,22 @@ std::string WordSplitter::normalizeWord(std::string word) {
     };
 
     return word;  // unquoted or fallback
+}
+
+std::string WordSplitter::normalizeBackSlash(std::string word) {
+    std::string normalized;
+
+    for (int i = 0; i < word.size(); i++) {
+        if (word[i] == '\\' && StringUtil::isEscapedCharacter(i, word)) {
+            normalized += word[i];
+        }
+        else {
+            if (word[i] != '\\') normalized += word[i];
+        }
+
+    }
+
+    return  normalized;
 }
 
 bool WordSplitter::hasEscapedGlobChar(std::string rawWord) {

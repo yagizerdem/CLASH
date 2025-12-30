@@ -17,6 +17,7 @@ private:
     std::string normalizeWord(std::string word);
     bool hasEscapedGlobChar(std::string rawWord);
     bool hasQuotedGlobChar(std::string rawWord);
+    std::string normalizeBackSlash(std::string word);
 };
 
 

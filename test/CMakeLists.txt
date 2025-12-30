@@ -51,6 +51,11 @@ add_executable(
         ltr_scanner_test.cc
 )
 
+add_executable(
+        globExpandTest
+        glob_expand_test.cc
+)
+
 
 target_link_libraries(processTest PUBLIC processLib)
 target_link_libraries(processTest PRIVATE GTest::gtest GTest::gtest_main)
@@ -73,6 +78,9 @@ target_link_libraries(parseCommandTest PRIVATE GTest::gtest GTest::gtest_main)
 target_link_libraries(ltrScannerTest PUBLIC expandLib)
 target_link_libraries(ltrScannerTest PRIVATE GTest::gtest GTest::gtest_main)
 
+target_link_libraries(globExpandTest PUBLIC lexerLib)
+target_link_libraries(globExpandTest PRIVATE GTest::gtest GTest::gtest_main)
+
 
 include(GoogleTest)
 gtest_discover_tests(processTest)
@@ -82,3 +90,4 @@ gtest_discover_tests(commandSplitterTest)
 gtest_discover_tests(wordSplitterTest)
 gtest_discover_tests(parseCommandTest)
 gtest_discover_tests(ltrScannerTest)
+gtest_discover_tests(globExpandTest)

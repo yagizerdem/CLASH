@@ -36,13 +36,15 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
                 Pipe pipe = *pipePtr;
                 EngineResponse pipeResponse = executePipe(pipe);
 
-                // std out
-                response.stdoutPayload.insert(response.stdoutPayload.end(),
-                    pipeResponse.stdoutPayload.begin(), pipeResponse.stdoutPayload.end());
+                if (env->bufferMode) {
+                    // std out
+                    response.stdoutPayload.insert(response.stdoutPayload.end(),
+                        pipeResponse.stdoutPayload.begin(), pipeResponse.stdoutPayload.end());
 
-                // std err
-                response.stderrPayload.insert(response.stderrPayload.end(),
-                    pipeResponse.stderrPayload.begin(), pipeResponse.stderrPayload.end());
+                    // std err
+                    response.stderrPayload.insert(response.stderrPayload.end(),
+                        pipeResponse.stderrPayload.begin(), pipeResponse.stderrPayload.end());
+                }
 
                 response.interactiveContinue = pipeResponse.interactiveContinue;
                 response.lastCommandExitStatus = pipeResponse.lastCommandExitStatus;
@@ -55,13 +57,15 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
                 Command shellCommand = *cmdPtr;
                 EngineResponse commandResponse = executeCommand(shellCommand);
 
-                // std out
-                response.stdoutPayload.insert(response.stdoutPayload.end(),
-                    commandResponse.stdoutPayload.begin(), commandResponse.stdoutPayload.end());
+                if (env->bufferMode) {
+                    // std out
+                    response.stdoutPayload.insert(response.stdoutPayload.end(),
+                        commandResponse.stdoutPayload.begin(), commandResponse.stdoutPayload.end());
 
-                // std err
-                response.stderrPayload.insert(response.stderrPayload.end(),
-                    commandResponse.stderrPayload.begin(), commandResponse.stderrPayload.end());
+                    // std err
+                    response.stderrPayload.insert(response.stderrPayload.end(),
+                        commandResponse.stderrPayload.begin(), commandResponse.stderrPayload.end());
+                }
 
                 response.interactiveContinue = commandResponse.interactiveContinue;
                 response.lastCommandExitStatus = commandResponse.lastCommandExitStatus;

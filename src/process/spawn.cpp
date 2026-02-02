@@ -38,6 +38,8 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand) {
 }
 
 ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<char*> envp) {
+    Env* env = Env::getInstance();
+
     const int MSGSIZE = 4096;
     char outbuf[MSGSIZE];
     char errbuf[MSGSIZE];
@@ -79,8 +81,10 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<cha
             close(fd);
         }
         else {
-            dup2(stdOutPipe[1], STDOUT_FILENO);
-            close(stdOutPipe[1]);
+            if (env->bufferMode) {
+                dup2(stdOutPipe[1], STDOUT_FILENO);
+                close(stdOutPipe[1]);
+            }
         }
 
         if (!shellCommand.redirectStandartInput.lexeme.empty()) {
@@ -98,8 +102,11 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<cha
             close(fd);
         }
 
-        dup2(stdErrPipe[1], STDERR_FILENO);
-        close(stdErrPipe[1]);
+        if (env->bufferMode) {
+            dup2(stdErrPipe[1], STDERR_FILENO);
+            close(stdErrPipe[1]);
+        }
+
 
         std::string executablePath = resolveExecutablePath(shellCommand.argv[0].lexeme);
 
@@ -116,31 +123,32 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<cha
         _exit(126);
     }
 
-    close(stdOutPipe[1]);
-    close(stdErrPipe[1]);
+    if (env->bufferMode) {
+        close(stdOutPipe[1]);
+        close(stdErrPipe[1]);
 
+        auto readStdOut = [&stdOutPipe, &outbuf, MSGSIZE, &stdOut]( ) -> void {
+            size_t n;
+            while ((n = read(stdOutPipe[0], outbuf, MSGSIZE)) > 0) {
+                stdOut.append(outbuf, n);
+            }
+            close(stdOutPipe[0]);
+        };
 
-    auto readStdOut = [&stdOutPipe, &outbuf, MSGSIZE, &stdOut]( ) -> void {
-        size_t n;
-        while ((n = read(stdOutPipe[0], outbuf, MSGSIZE)) > 0) {
-            stdOut.append(outbuf, n);
-        }
-        close(stdOutPipe[0]);
-    };
+        auto readStdErr = [&stdErrPipe, &errbuf, MSGSIZE, &stdErr]( ) -> void {
+            size_t n;
+            while ((n = read(stdErrPipe[0], errbuf, MSGSIZE)) > 0) {
+                stdErr.append(errbuf, n);
+            }
+            close(stdErrPipe[0]);
+        };
 
-    auto readStdErr = [&stdErrPipe, &errbuf, MSGSIZE, &stdErr]( ) -> void {
-        size_t n;
-        while ((n = read(stdErrPipe[0], errbuf, MSGSIZE)) > 0) {
-            stdErr.append(errbuf, n);
-        }
-        close(stdErrPipe[0]);
-    };
+        std::thread stdOutThread(readStdOut);
+        std::thread stdErrThread(readStdErr);
 
-    std::thread stdOutThread(readStdOut);
-    std::thread stdErrThread(readStdErr);
-
-    stdOutThread.join();
-    stdErrThread.join();
+        stdOutThread.join();
+        stdErrThread.join();
+    }
 
     int child_exit_status;
     waitpid(c_pid, &child_exit_status, 0);
@@ -181,6 +189,8 @@ ExecuteProcessResult Spawn::executeProcess(Command shellCommand, std::vector<cha
 ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
                                         std::vector<char*> envp)
 {
+    Env* env = Env::getInstance();
+
     const int MSGSIZE = 4096;
     int n = 0;
     for (int i = 0; i < pipeModel.commands.size(); i++) {
@@ -193,14 +203,29 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
     std::vector<std::array<int,2>> errPipes(n);
 
     for (int i = 0; i < n; i++) {
-        if (pipe(outPipes[i].data()) < 0) {
-            perror("pipe stdout");
-            exit(EXIT_FAILURE);
+        if (env->bufferMode) {
+            if (pipe(outPipes[i].data()) < 0) {
+                perror("pipe stdout");
+                exit(EXIT_FAILURE);
+            }
+            if (pipe(errPipes[i].data()) < 0) {
+                perror("pipe stderr");
+                exit(EXIT_FAILURE);
+            }
         }
-        if (pipe(errPipes[i].data()) < 0) {
-            perror("pipe stderr");
-            exit(EXIT_FAILURE);
+        else {
+            if (i != n -1) {
+                if (pipe(outPipes[i].data()) < 0) {
+                    perror("pipe stdout");
+                    exit(EXIT_FAILURE);
+                }
+                if (pipe(errPipes[i].data()) < 0) {
+                    perror("pipe stderr");
+                    exit(EXIT_FAILURE);
+                }
+            }
         }
+
     }
 
     std::vector<pid_t> pids;
@@ -254,17 +279,38 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
                 close(fd);
             }
             else {
-                dup2(outPipes[i][1], STDOUT_FILENO);
+
+                if (env->bufferMode) {
+
+                }
+                else {
+                    if (i < n - 1) {
+                        dup2(outPipes[i][1], STDOUT_FILENO);
+                    }
+                }
+            }
+
+            if (env->bufferMode) {
+                dup2(errPipes[i][1], STDERR_FILENO);
             }
 
 
-            dup2(errPipes[i][1], STDERR_FILENO);
-
             for (int j = 0; j < n; j++) {
-                close(outPipes[j][0]);
-                close(outPipes[j][1]);
-                close(errPipes[j][0]);
-                close(errPipes[j][1]);
+                if (env->bufferMode) {
+                    close(outPipes[j][0]);
+                    close(outPipes[j][1]);
+                    close(errPipes[j][0]);
+                    close(errPipes[j][1]);
+                }
+                else {
+                    if (j != n - 1) {
+                        close(outPipes[j][0]);
+                        close(outPipes[j][1]);
+                        close(errPipes[j][0]);
+                        close(errPipes[j][1]);
+                    }
+                }
+
             }
 
             std::string exe = resolveExecutablePath(shellCommand.argv[0].lexeme);
@@ -290,8 +336,16 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
     }
 
     for (int i = 0; i < n; i++) {
-        close(outPipes[i][1]);
-        close(errPipes[i][1]);
+        if (env->bufferMode) {
+            close(outPipes[i][1]);
+            close(errPipes[i][1]);
+        }
+        else {
+            if (i != n -1) {
+                close(outPipes[i][1]);
+                close(errPipes[i][1]);
+            }
+        }
     }
 
     std::unordered_map<int, std::string> stdErrs;
@@ -306,13 +360,19 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
         return result;
     };
 
-    for (int i = 0; i < n; i++) {
-        stdErrs[i] = readPipe(errPipes[i][0]);
-        close(errPipes[i][0]);
+    if (env->bufferMode) {
+        for (int i = 0; i < n; i++) {
+            stdErrs[i] = readPipe(errPipes[i][0]);
+            close(errPipes[i][0]);
+        }
     }
 
-    std::string finalStdOut = readPipe(outPipes[n - 1][0]);
-    close(outPipes[n - 1][0]);
+    std::string finalStdOut;
+    if (env->bufferMode) {
+        finalStdOut = readPipe(outPipes[n - 1][0]);
+        close(outPipes[n - 1][0]);
+    }
+
 
     // wait
     std::unordered_map<int,int> exit_status;
@@ -324,12 +384,14 @@ ExecuteProcessResult Spawn::executePipe(Pipe pipeModel,
 
     ExecuteProcessResult result;
 
-    result.stdOut = finalStdOut;
+    if (env->bufferMode) {
+        result.stdOut = finalStdOut;
 
-    for (auto &e : stdErrs) {
-        if (!e.second.empty()) {
-            result.stdErr += e.second;
-            result.stdErr += "\n";
+        for (auto &e : stdErrs) {
+            if (!e.second.empty()) {
+                result.stdErr += e.second;
+                result.stdErr += "\n";
+            }
         }
     }
 

@@ -46,6 +46,8 @@ public:
 
     void setCwd(std::string value);
     std::string getCwd();
+
+    bool bufferMode = false;
 };
 
 

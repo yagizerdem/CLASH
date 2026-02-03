@@ -13,6 +13,7 @@
   - [Execution](#execution)
 - [Built-in Commands](#built-in-commands)
 - [Variables and Special Parameters](#variables-and-special-parameters)
+- [Buffered mode](#buffered-mode)
 - [PATH Resolution and Cache](#the-path-variable-and-its-cache)
 - [Testing](#testing)
 - [License](#license)
@@ -311,6 +312,20 @@ The following variables have special meanings and behaviors:
 
 When clash starts, it creates one variable for each environment variable received from its parent. When clash creates subprocesses, it passes some of its variables to the subprocess as environment variables. These variables are referred to as exported. When clash creates initial variable bindings from its environment, it marks each of these variables as exported. The export built-in command can be used to mark additional variables as exported.
 
+## Buffered Mode
+
+Use the `-b` flag to enable **buffered stdio**.  
+When buffered mode is enabled, standard output is flushed **only when the process exits**.
+
+### Example
+
+```bash
+CLASH -b -c node /absolute/path/script.js
+```
+To run CLASH in buffered mode with an interactive REPL:
+```
+CLASH -b
+```
 ## The PATH Variable and its Cache
 
 The PATH variable is used by clash to locate executables for commands. It consists of any number of directory names separated by colons. To execute a command, clash searches each of the directories in the PATH variable to see if they contain an executable file whose name is the same as the first word of the command. If so, the first matching file that is executable is used (if no executable file is found, the first non-executable one is used).

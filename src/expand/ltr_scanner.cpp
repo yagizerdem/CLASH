@@ -183,6 +183,7 @@ LTR_scanner::CollectWordResult LTR_scanner::collectBackTickWord(std::string rawS
 // expand
 
 std::string LTR_scanner::expand(std::string word, std::unordered_map<std::string, Variable> env) {
+    Env *app_env = Env::getInstance();
     std::string expanded;
     int lookAhead =0;
     while (lookAhead < word.length()) {
@@ -218,7 +219,11 @@ std::string LTR_scanner::expand(std::string word, std::unordered_map<std::string
                     cmd = parse_command.parse(cmd);
                     ExecuteProcessResult result = Spawn::executeProcess(cmd);
 
+                    bool oldFlag = app_env->bufferMode;
+                    app_env->bufferMode = true;
                     if (!result.stdOut.empty()) expanded += normalizeStdOut(result.stdOut);
+                    app_env->bufferMode = oldFlag;
+
                 }
                 if (pipePtr != nullptr) {
                     Pipe pipe = *pipePtr;
@@ -228,9 +233,13 @@ std::string LTR_scanner::expand(std::string word, std::unordered_map<std::string
                         cmd = parse_command.parse(cmd);
                         pipe.commands[j]= cmd;
                     }
+
+                    bool oldFlag = app_env->bufferMode;
+                    app_env->bufferMode = true;
                     ExecuteProcessResult result = Spawn::executePipe(pipe);
 
                     if (!result.stdOut.empty()) expanded += normalizeStdOut(result.stdOut);
+                    app_env->bufferMode = oldFlag;
                 }
 
 

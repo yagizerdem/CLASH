@@ -43,7 +43,7 @@ cat $INPUTFILE
 echo "Matched:"
 cat $OUTPUTFILE
 
-MSG="Upper user: `echo USERNAME | tr a-z A-Z`"
+MSG=`echo $USERNAME | tr a-z A-Z`
 echo "$MSG"
 
 echo "FINAL" > $OUTPUTFILE

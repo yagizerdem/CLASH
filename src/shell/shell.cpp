@@ -4,6 +4,7 @@
 
 #include "shell.h"
 
+#include <cstring>
 #include <iostream>
 #include <string>
 
@@ -24,6 +25,22 @@ void Shell::start(int argc, char *argv[]) {
     // default for every initialization type (from file | interactive reading | from argv)
     std::string programName = argv[0];
     env->setEnv("0", programName);
+
+    // check buffered mode default false
+    char **argv_ = (char**)malloc(sizeof(char*) * argc);
+    int argc_ = 0;
+
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "-b") == 0) {
+            env->bufferMode = true;
+            continue;
+        }
+
+        argv_[argc_++] = argv[i];
+    }
+
+    argv = argv_;
+    argc = argc_;
 
     if (argc == 1) {
         runInteractiveMode();
@@ -113,16 +130,20 @@ void Shell::runArgvMode(int argc, char *argv[]) {
         env->setEnv("#", std::to_string(argc - 3));
         env->setEnv("*", argvAccumulator);
 
+        shellCommand.append(" ").append(argvAccumulator);
+
         // execute raw shell command
         Engine engine;
         EngineResponse response =   engine.handleUserInput(shellCommand);
 
-        for (const auto& line : response.stdoutPayload) {
-            std::cout << line << '\n';
-        }
+        if (env->bufferMode) {
+            for (const auto& line : response.stdoutPayload) {
+                std::cout << line << '\n';
+            }
 
-        for (const auto& line : response.stderrPayload) {
-            std::cerr << line << '\n';
+            for (const auto& line : response.stderrPayload) {
+                std::cerr << line << '\n';
+            }
         }
     }
 
@@ -150,14 +171,15 @@ void Shell::runFileMode(int argc, char *argv[]) {
         Engine engine;
         EngineResponse response = engine.handleUserInput(rawUserInput);
 
-        for (const auto& line : response.stdoutPayload) {
-            std::cout << line << '\n';
-        }
+        if (env->bufferMode) {
+            for (const auto& line : response.stdoutPayload) {
+                std::cout << line << '\n';
+            }
 
-        for (const auto& line : response.stderrPayload) {
-            std::cerr << line << '\n';
+            for (const auto& line : response.stderrPayload) {
+                std::cerr << line << '\n';
+            }
         }
-
     }
 }
 

@@ -49,7 +49,10 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
                 response.interactiveContinue = pipeResponse.interactiveContinue;
                 response.lastCommandExitStatus = pipeResponse.lastCommandExitStatus;
                 response.success = pipeResponse.success;
-                response.terminate = pipeResponse.terminate;
+                // i overwrite false for this flag , idk i dont want repl break after invalid syntax or process errors
+                // in later versions i may change that logic idk
+                // response.terminate = pipeResponse.terminate;
+                response.terminate = false;
 
                 env->setEnv("?", std::to_string(response.lastCommandExitStatus));
             }
@@ -70,7 +73,8 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
                 response.interactiveContinue = commandResponse.interactiveContinue;
                 response.lastCommandExitStatus = commandResponse.lastCommandExitStatus;
                 response.success = commandResponse.success;
-                response.terminate = commandResponse.terminate;
+                // response.terminate = commandResponse.terminate;
+                response.terminate = false;
 
                 env->setEnv("?", std::to_string(response.lastCommandExitStatus));
             }
@@ -80,27 +84,32 @@ EngineResponse Engine::handleUserInput(std::string rawUserInput) {
     }catch (SyntaxError ex) {
         response.stderrPayload.push_back(ex.what());
         response.success = false;
+        response.terminate = false;
         return response;
     }
     catch (IncompleteInput ex) {
         response.stderrPayload.push_back(ex.what());
         response.success = false;
         response.interactiveContinue = true;
+        response.terminate = false;
         return response;
     }
     catch (ExecutionError ex) {
         response.stderrPayload.push_back(ex.what());
         response.success = false;
+        response.terminate = false;
         return response;
     }
     catch (const std::exception& ex) {
         response.stderrPayload.push_back(ex.what());
         response.success = false;
+        response.terminate = false;
         return response;
     }
     catch (...) {
         response.stderrPayload.push_back("unknown internal error");
         response.success = false;
+        response.terminate = true;
         return response;
     }
 }

@@ -10,7 +10,9 @@ set(SANITIZE_UNDEFINED ON CACHE BOOL "Enable UndefinedBehaviorSanitizer" FORCE)
 
 find_package(Sanitizers REQUIRED)
 
-add_executable(Clash main.cpp backward.cpp backward.hpp)
+add_executable(Clash src/main.cpp backward.cpp backward.hpp
+        src/util.h
+        src/util.cpp)
 
 file(
         DOWNLOAD

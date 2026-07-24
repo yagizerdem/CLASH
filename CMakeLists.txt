@@ -26,14 +26,14 @@ include(${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake)
 CPMAddPackage(
         NAME cpp-tree-sitter
         GIT_REPOSITORY https://github.com/nsumner/cpp-tree-sitter.git
-        GIT_TAG v0.0.1
+        GIT_TAG v0.0.3
 )
 
 # Downloads a tree-sitter grammar from github and makes it available as a
 # cmake library target.
 add_grammar_from_repo(tree-sitter-bash            # Defines the library name for a grammar
         https://github.com/tree-sitter/tree-sitter-bash.git  # Repository URL of a tree-sitter grammar
-        0.25.1                                               # Version tag for the grammar
+        0.23.3                                               # Version tag for the grammar
 )
 
 add_grammar_from_repo(tree-sitter-json

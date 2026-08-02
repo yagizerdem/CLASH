@@ -1,21 +1,19 @@
 package io.Clash;
 
+import io.Clash.ast.Util;
+import io.Clash.parser.core.BashParser;
 import org.treesitter.TSNode;
-import org.treesitter.TSParser;
 import org.treesitter.TSTree;
-import org.treesitter.TreeSitterBash;
+
 public class Main {
     public static void main(String[] args) {
-        String source = "name=\"World\"\necho \"Hello, $name\"\n";
+        String source = "$((4 + 5))";
 
-        TSParser parser = new TSParser();
-        if (!parser.setLanguage(new TreeSitterBash())) {
-            throw new IllegalStateException("Tree-sitter Bash grammar could not be loaded");
-        }
+        BashParser parser = new BashParser(source);
+        TSTree tree = parser.parseTS();
+        TSNode matched = Util.getFirstMatchedTypeDFS(tree.getRootNode(), "arithmetic_expansion");
 
-        TSTree tree = parser.parseString(null, source);
-        System.out.println("Tree-sitter Bash AST:");
-        System.out.println(tree.getRootNode());
+        System.out.println(matched);
 
     }
 }

@@ -44,7 +44,7 @@ public class BashParser {
 
     // primary-expr parser
     public AstNode parsearithmetic_expansion(TSNode node) {
-
+        return null;
     }
 
 

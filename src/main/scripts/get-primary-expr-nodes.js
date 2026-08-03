@@ -1,6 +1,8 @@
 const { readFileSync, writeFileSync } = require("fs");
+const { resolve } = require("path");
 
-const data = readFileSync("./node-types.json", { encoding: "utf8" });
+const nodeTypesPath = resolve(__dirname, "..", "node-types.json");
+const data = readFileSync(nodeTypesPath, { encoding: "utf8" });
 const jsonData = JSON.parse(data);
 
 const set = new Set();

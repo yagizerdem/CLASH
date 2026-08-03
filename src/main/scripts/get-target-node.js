@@ -6,9 +6,8 @@ const nodeTypesPath = resolve(__dirname, "..", "node-types.json");
 const data = readFileSync(nodeTypesPath, { encoding: "utf8" });
 const jsonData = JSON.parse(data);
 
-const types = jsonData.map((node) => node.type);
+const targetType = process.argv[2];
 
-console.dir(types, {
-  maxArrayLength: null,
-  depth: null,
-});
+const target = jsonData.find((node) => node.type === targetType);
+
+console.log(target);

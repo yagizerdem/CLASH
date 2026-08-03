@@ -1,19 +1,28 @@
 package io.Clash;
 
 import io.Clash.ast.Util;
+import io.Clash.ast.base.AstNode;
 import io.Clash.parser.core.BashParser;
 import org.treesitter.TSNode;
 import org.treesitter.TSTree;
 
 public class Main {
     public static void main(String[] args) {
-        String source = "$((4 + 5))";
+        try {
+            String source = "$@";
 
-        BashParser parser = new BashParser(source);
-        TSTree tree = parser.parseTS();
-        TSNode matched = Util.getFirstMatchedTypeDFS(tree.getRootNode(), "arithmetic_expansion");
+            BashParser parser = new BashParser(source);
+            TSTree tree = parser.parseTS();
+            System.out.println(tree.getRootNode());
 
-        System.out.println(matched);
+            TSNode matched = Util.getFirstMatchedTypeDFS(tree.getRootNode(), "simple_expansion");
+
+            AstNode node = parser.parse(matched);
+
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
 
     }
 }

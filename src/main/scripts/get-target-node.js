@@ -10,4 +10,4 @@ const targetType = process.argv[2];
 
 const target = jsonData.find((node) => node.type === targetType);
 
-console.log(target);
+console.dir(target, {maxArrayLength: null, depth: null });

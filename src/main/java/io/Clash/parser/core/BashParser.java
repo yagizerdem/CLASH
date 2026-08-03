@@ -1,18 +1,18 @@
 package io.Clash.parser.core;
 
 import io.Clash.ast.base.AstNode;
-import io.Clash.ast.base.SourceSpan;
-import io.Clash.ast.base.SyntaxInfo;
 import org.treesitter.*;
 
-public class BashParser {
+import java.util.ArrayList;
+import java.util.List;
 
-    private final String program;
+public class BashParser extends cBaseParser {
+
 
     private final TSParser tsParser;
 
     public BashParser(String program) {
-        this.program = program;
+        super(program, null);
 
         this.tsParser = new TSParser();
         if (!this.tsParser.setLanguage(new TreeSitterBash())) {
@@ -22,42 +22,24 @@ public class BashParser {
 
     // tree sitter
     public TSTree parseTS() {
-        return this.tsParser.parseString(null, program);
+        return this.tsParser.parseString(null, this.getProgram());
     }
 
-    // custom parser
-    public void parse(TSTree tree) {
+    // parser program
+    public List<AstNode> parse(TSTree tree) {
         TSNode root = tree.getRootNode();
-        parseNode(root);
-    }
-
-    public AstNode parseNode(TSNode node) {
-        return switch (node.getType()) {
-            // primary-expr
-            case "arithmetic_expansion" -> parsearithmetic_expansion(node);
-
-            // stmt
-            case "c_style_for_statement" -> parsec_style_for_statement(node);
-            default -> throw new IllegalStateException("unknown stmt");
-        };
-    }
-
-    // primary-expr parser
-    public AstNode parsearithmetic_expansion(TSNode node) {
-        return null;
+        List<AstNode> stmts = new ArrayList<>();
+        for(int i = 0; i < root.getChildCount(); i++) {
+            cBaseParser parser = dispatcher(root.getChild(i));
+            stmts.add(parser.parse(root.getChild(i)));
+        }
+        return stmts;
     }
 
 
-    // stmt parser
-
-    public AstNode parsec_style_for_statement(TSNode node) {
-        SourceSpan span = new SourceSpan(node.getStartByte(), node.getEndByte());
-        SyntaxInfo syntaxInfo = new SyntaxInfo(span, this.program.substring(span.startByte(), span.endByte()));
-
-//        CStyleForStatementNode stmt = new CStyleForStatementNode();
-
-        return null;
+    @Override
+    public AstNode parse(TSNode node) {
+        cParser parser = dispatcher(node);
+        return parser.parse(node);
     }
-
-
 }

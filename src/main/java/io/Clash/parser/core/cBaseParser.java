@@ -45,6 +45,7 @@ public abstract class cBaseParser implements cParser {
 
             // primary-expr
             case "expansion" -> new cExpansionParser(program, node);
+            case "arithmetic_expansion" -> new cArithmeticExpansionParser(program, node);
             case "command_substitution" -> new cCommandSubstitutionParser(program, node);
             case "number" -> new cNumberParser(program, node);
             case "simple_expansion" -> new cSimpleExpansionParser(program, node);
@@ -53,6 +54,7 @@ public abstract class cBaseParser implements cParser {
             case "ansi_c_string" -> new cAnsiCStringParser(program, node);
             case "brace_expression" -> new cBraceExpressionParser(program, node);
             case "process_substitution" -> new cProcessSubstitutionParser(program, node);
+            case "translated_string" -> new cTranslatedStringParser(program, node);
 
             //expr
             case "word" -> new cWordParser(program, node);
@@ -85,6 +87,7 @@ public abstract class cBaseParser implements cParser {
 
             // other
             case "array" -> new cArrayParser(program, node);
+            case "comment" -> new cCommentParser(program, node);
             case "case_item" -> new cCaseItemParser(program, node);
             case "command_name" -> new cCommandNameParser(program, node);
             case "do_group" -> new cDoGroupParser(program, node);
@@ -99,7 +102,9 @@ public abstract class cBaseParser implements cParser {
             case "heredoc_redirect" -> new cHeredocRedirectParser(program, node);
             case "heredoc_start" -> new cHeredocStartParser(program, node);
             case "herestring_redirect" -> new cHerestringRedirectParser(program, node);
+            case "string_content" -> new cStringContentParser(program, node);
             case "subscript" -> new cSubscriptParser(program, node);
+            case "test_operator" -> new cTestOperatorParser(program, node);
             case "special_variable_name" -> new cSpecialVariableNameParser(program, node);
             case "variable_name" -> new cVariableNameParser(program, node);
             case "regex" -> new cRegexParser(program, node);

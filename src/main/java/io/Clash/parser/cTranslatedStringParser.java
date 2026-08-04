@@ -18,7 +18,7 @@ public class cTranslatedStringParser extends cBaseParser {
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "translated_string");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
-        TSNode stringTsNode = tsNode.getChild(0);
+        TSNode stringTsNode = tsNode.getNamedChild(0);
         AstNode stringAst = this.dispatcher(stringTsNode).parse(stringTsNode);
         return new TranslatedStringNode(syntaxInfo, stringAst);
     }

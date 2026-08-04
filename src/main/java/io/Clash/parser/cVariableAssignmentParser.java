@@ -16,7 +16,6 @@ public class cVariableAssignmentParser extends cBaseParser {
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "variable_assignment");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
-        String var = this.getProgramByOffsets();
 
         TSNode tsNameNode = tsNode.getChildByFieldName("name");
         TSNode tsValueNode = tsNode.getChildByFieldName("value");

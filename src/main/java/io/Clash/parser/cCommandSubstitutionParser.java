@@ -3,6 +3,7 @@ package io.Clash.parser;
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.SourceSpan;
 import io.Clash.ast.base.SyntaxInfo;
+import io.Clash.ast.primaryExpr.CommandSubstitutionNode;
 import io.Clash.ast.primaryExpr.NumberNode;
 import io.Clash.parser.core.cBaseParser;
 import org.treesitter.TSNode;
@@ -21,6 +22,11 @@ public class cCommandSubstitutionParser extends cBaseParser {
         this.checkType(tsNode, "command_substitution");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
 
-        return null;
+        TSNode tsRedirectNode = tsNode.getChildByFieldName("redirect");
+
+        AstNode fileRedirectNode = this.dispatcher(tsRedirectNode).parse(tsRedirectNode);
+        List<AstNode> parts = this.collectNamedChildren(tsNode);
+
+        return new CommandSubstitutionNode(syntaxInfo, parts, fileRedirectNode);
     }
 }

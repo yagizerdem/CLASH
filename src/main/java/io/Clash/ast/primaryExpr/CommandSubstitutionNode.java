@@ -10,24 +10,24 @@ import io.Clash.ast.base.SyntaxInfo;
 import java.util.List;
 
 public final class CommandSubstitutionNode extends PrimaryExprNode {
-    private final List<StmtNode> statements;
-    private final List<AstNode> redirects;
+    private final List<AstNode> statements;
+    private final AstNode redirect;
 
     public CommandSubstitutionNode(
             SyntaxInfo syntax,
-            List<StmtNode> statements,
-            List<AstNode> redirects
+            List<AstNode> statements,
+            AstNode redirect
     ) {
         super(syntax, ExpressionNodeType.COMMAND_SUBSTITUTION);
         this.statements = ExprNode.list(statements, "statements");
-        this.redirects = ExprNode.list(redirects, "redirects");
+        this.redirect = redirect;
     }
 
-    public List<StmtNode> statements() {
+    public List<AstNode> statements() {
         return statements;
     }
 
-    public List<AstNode> redirects() {
-        return redirects;
+    public AstNode redirect() {
+        return redirect;
     }
 }

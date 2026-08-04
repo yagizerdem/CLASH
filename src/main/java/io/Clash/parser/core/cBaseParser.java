@@ -43,7 +43,14 @@ public abstract class cBaseParser implements cParser {
             case "command_substitution" -> new cCommandSubstitutionParser(program, node);
             case "number" -> new cNumberParser(program, node);
             case "simple_expansion" -> new cSimpleExpansionParser(program, node);
+            case "string" -> new cStringParser(program, node);
+            case "raw_string" -> new cRawStringParser(program, node);
+            case "ansi_c_string" -> new cAnsiCStringParser(program, node);
+            case "brace_expression" -> new cBraceExpressionParser(program, node);
+            case "process_substitution" -> new cProcessSubstitutionParser(program, node);
             //expr
+            case "word" -> new cWordParser(program, node);
+
             case "binary_expression" -> new cBinaryExpressionParser(program, node);
             // stmt
 

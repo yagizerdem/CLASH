@@ -50,8 +50,12 @@ public abstract class cBaseParser implements cParser {
             case "process_substitution" -> new cProcessSubstitutionParser(program, node);
             //expr
             case "word" -> new cWordParser(program, node);
-
             case "binary_expression" -> new cBinaryExpressionParser(program, node);
+            case "concatenation" -> new cConcatenationParser(program, node);
+            case "parenthesized_expression" -> new cParenthesizedExpressionParser(program, node);
+            case "postfix_expression" -> new cPostfixExpressionParser(program, node);
+            case "ternary_expression" -> new cTernaryExpressionParser(program, node);
+            case "unary_expression" -> new cUnaryExpressionParser(program, node);
             // stmt
 
 
@@ -60,7 +64,6 @@ public abstract class cBaseParser implements cParser {
             case "special_variable_name" -> new cSpecialVariableNameParser(program, node);
             case "variable_name" -> new cVariableNameParser(program, node);
             case "regex" -> new cRegexParser(program, node);
-            case "parenthesized_expression" -> new cParenthesizedExpressionParser(program, node);
 
 
             default -> throw new IllegalStateException("unknown stmt");

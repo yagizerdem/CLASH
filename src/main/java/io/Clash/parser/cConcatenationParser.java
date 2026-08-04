@@ -2,23 +2,22 @@ package io.Clash.parser;
 
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.SyntaxInfo;
-import io.Clash.ast.primaryExpr.NumberNode;
+import io.Clash.ast.expr.ConcatenationNode;
 import io.Clash.parser.core.cBaseParser;
 import org.treesitter.TSNode;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class cNumberParser extends cBaseParser {
+public class cConcatenationParser extends cBaseParser {
 
-    public cNumberParser(String program, TSNode node) {
+    public cConcatenationParser(String program, TSNode node) {
         super(program, node);
     }
 
     public AstNode parse(TSNode tsNode) {
-        this.checkType(tsNode, "number");
+        this.checkType(tsNode, "concatenation");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
         List<AstNode> parts = this.collectNamedChildren(tsNode);
-        return new NumberNode(syntaxInfo, parts);
+        return new ConcatenationNode(syntaxInfo, parts);
     }
 }

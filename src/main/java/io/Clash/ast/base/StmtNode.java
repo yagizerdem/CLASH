@@ -3,23 +3,17 @@ package io.Clash.ast.base;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class StmtNode implements AstNode {
-    private final SyntaxInfo syntax;
+public abstract class StmtNode extends BaseAstNode {
     private final StatementNodeType type;
 
     protected StmtNode(SyntaxInfo syntax, StatementNodeType type) {
-        this.syntax = Objects.requireNonNull(syntax, "syntax");
+        super(Objects.requireNonNull(syntax, "syntax"));
         this.type = type;
     }
 
 
     public final StatementNodeType getType() {
         return this.type;
-    }
-
-    @Override
-    public SyntaxInfo getSyntax() {
-        return this.syntax;
     }
 
 

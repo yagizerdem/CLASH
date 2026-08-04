@@ -1,4 +1,4 @@
-package io.Clash.ast.primaryExpr;
+package io.Clash.ast.expr;
 
 import io.Clash.ast.base.ExpressionNodeType;
 import io.Clash.ast.base.PrimaryExprNode;

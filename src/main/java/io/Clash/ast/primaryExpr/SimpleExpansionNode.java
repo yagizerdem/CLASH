@@ -7,17 +7,17 @@ import io.Clash.ast.base.PrimaryExprNode;
 import io.Clash.ast.base.SyntaxInfo;
 
 public final class SimpleExpansionNode extends PrimaryExprNode {
-    private final String variable;
+    private final AstNode variable;
 
     public SimpleExpansionNode(
             SyntaxInfo syntax,
-            String variable
+            AstNode variable
     ) {
         super(syntax, ExpressionNodeType.SIMPLE_EXPANSION);
         this.variable = ExprNode.required(variable, "variable");
     }
 
-    public String variable() {
+    public AstNode getVariable() {
         return variable;
     }
 }

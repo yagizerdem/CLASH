@@ -3,6 +3,7 @@ package io.Clash.parser;
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.SourceSpan;
 import io.Clash.ast.base.SyntaxInfo;
+import io.Clash.ast.primaryExpr.ExpansionNode;
 import io.Clash.parser.core.cBaseParser;
 import org.treesitter.TSNode;
 
@@ -19,9 +20,9 @@ public class cExpansionParser extends cBaseParser {
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "expansion");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
-
-
-
-        return null;
+        org.treesitter.TSNode fieldNode = tsNode.getChildByFieldName("operator");
+        String op = fieldNode != null ? this.getProgramByOffsets(fieldNode) : null;
+        List<AstNode> parts = this.collectNamedChildren(tsNode);
+        return new ExpansionNode(syntaxInfo, op, parts);
     }
 }

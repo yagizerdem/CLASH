@@ -6,7 +6,8 @@ import io.Clash.ast.base.SyntaxInfo;
 import io.Clash.parser.*;
 import org.treesitter.TSNode;
 
-import java.util.concurrent.RecursiveTask;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class cBaseParser implements cParser {
 
@@ -42,13 +43,17 @@ public abstract class cBaseParser implements cParser {
             case "command_substitution" -> new cCommandSubstitutionParser(program, node);
             case "number" -> new cNumberParser(program, node);
             case "simple_expansion" -> new cSimpleExpansionParser(program, node);
+            //expr
+            case "binary_expression" -> new cBinaryExpressionParser(program, node);
             // stmt
 
 
 
             // util
             case "special_variable_name" -> new cSpecialVariableNameParser(program, node);
-            case "variable_name" -> new cVariableName(program, node);
+            case "variable_name" -> new cVariableNameParser(program, node);
+            case "regex" -> new cRegexParser(program, node);
+            case "parenthesized_expression" -> new cParenthesizedExpressionParser(program, node);
 
 
             default -> throw new IllegalStateException("unknown stmt");
@@ -79,4 +84,58 @@ public abstract class cBaseParser implements cParser {
         }
     }
 
+    public List<AstNode> collectNamedChildren(TSNode tsNode){
+        List<AstNode> parts = new ArrayList<>();
+        for(int i = 0; i < tsNode.getNamedChildCount(); i++) {
+            TSNode child = tsNode.getNamedChild(i);
+            cBaseParser parser = this.dispatcher(child);
+            AstNode cNode =parser.parse(child);
+            parts.add(cNode);
+        }
+        return parts;
+    }
+
+    public List<AstNode> collectNamedChildren(){
+        List<AstNode> parts = new ArrayList<>();
+        for(int i = 0; i < tsNode.getNamedChildCount(); i++) {
+            TSNode child = tsNode.getNamedChild(i);
+            cBaseParser parser = this.dispatcher(child);
+            AstNode cNode =parser.parse(child);
+            parts.add(cNode);
+        }
+        return parts;
+    }
+
+    public List<TSNode> getChildrenByFieldName(
+            String fieldName
+    ) {
+        List<TSNode> result = new ArrayList<>();
+
+        for (int i = 0; i < tsNode.getChildCount(); i++) {
+            String currentFieldName = tsNode.getFieldNameForChild(i);
+
+            if (fieldName.equals(currentFieldName)) {
+                result.add(tsNode.getChild(i));
+            }
+        }
+
+        return result;
+    }
+
+    public List<TSNode> getChildrenByFieldName(
+            TSNode tsNode,
+            String fieldName
+    ) {
+        List<TSNode> result = new ArrayList<>();
+
+        for (int i = 0; i < tsNode.getChildCount(); i++) {
+            String currentFieldName = tsNode.getFieldNameForChild(i);
+
+            if (fieldName.equals(currentFieldName)) {
+                result.add(tsNode.getChild(i));
+            }
+        }
+
+        return result;
+    }
 }

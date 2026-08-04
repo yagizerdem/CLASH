@@ -24,9 +24,9 @@ public class cSimpleExpansionParser extends cBaseParser {
 
         TSNode childTsNode = tsNode.getNamedChild(0);
         cBaseParser parser = this.dispatcher(childTsNode);
-        String varName = parser.parse(childTsNode);
+        AstNode identifier = parser.parse(childTsNode);
 
-        SimpleExpansionNode node = new SimpleExpansionNode(syntaxInfo, varName);
+        SimpleExpansionNode node = new SimpleExpansionNode(syntaxInfo, identifier);
         return node;
     }
 }

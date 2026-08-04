@@ -20,9 +20,9 @@ public class cExpansionParser extends cBaseParser {
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "expansion");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
-        org.treesitter.TSNode fieldNode = tsNode.getChildByFieldName("operator");
-        String op = fieldNode != null ? this.getProgramByOffsets(fieldNode) : null;
+        List<org.treesitter.TSNode> fieldNodes = this.getChildrenByFieldName("operator");
+        List<String> operator = fieldNodes.stream().map(this::getProgramByOffsets).toList();
         List<AstNode> parts = this.collectNamedChildren(tsNode);
-        return new ExpansionNode(syntaxInfo, op, parts);
+        return new ExpansionNode(syntaxInfo, operator, parts);
     }
 }

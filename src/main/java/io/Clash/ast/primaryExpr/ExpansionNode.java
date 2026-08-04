@@ -9,12 +9,12 @@ import io.Clash.ast.base.SyntaxInfo;
 import java.util.List;
 
 public final class ExpansionNode extends PrimaryExprNode {
-    private final String operator;
+    private final List<String> operator;
     private final List<AstNode> parts;
 
     public ExpansionNode(
             SyntaxInfo syntax,
-            String operator,
+            List<String> operator,
             List<AstNode> parts
     ) {
         super(syntax, ExpressionNodeType.EXPANSION);
@@ -22,7 +22,7 @@ public final class ExpansionNode extends PrimaryExprNode {
         this.parts = ExprNode.list(parts, "parts");
     }
 
-    public String operator() {
+    public List<String> operator() {
         return operator;
     }
 

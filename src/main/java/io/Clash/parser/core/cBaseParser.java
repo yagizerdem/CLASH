@@ -1,9 +1,11 @@
 package io.Clash.parser.core;
 
 import io.Clash.ast.base.AstNode;
+import io.Clash.ast.base.BaseAstNode;
 import io.Clash.ast.base.SourceSpan;
 import io.Clash.ast.base.SyntaxInfo;
 import io.Clash.parser.*;
+import io.Clash.parser.root.cProgramParse;
 import org.treesitter.TSNode;
 
 import java.util.ArrayList;
@@ -38,6 +40,9 @@ public abstract class cBaseParser implements cParser {
 
     public cBaseParser dispatcher(TSNode node) {
         return switch (node.getType()) {
+            // root
+            case "program" -> new cProgramParse(program, node);
+
             // primary-expr
             case "expansion" -> new cExpansionParser(program, node);
             case "command_substitution" -> new cCommandSubstitutionParser(program, node);
@@ -48,6 +53,7 @@ public abstract class cBaseParser implements cParser {
             case "ansi_c_string" -> new cAnsiCStringParser(program, node);
             case "brace_expression" -> new cBraceExpressionParser(program, node);
             case "process_substitution" -> new cProcessSubstitutionParser(program, node);
+
             //expr
             case "word" -> new cWordParser(program, node);
             case "binary_expression" -> new cBinaryExpressionParser(program, node);
@@ -56,17 +62,50 @@ public abstract class cBaseParser implements cParser {
             case "postfix_expression" -> new cPostfixExpressionParser(program, node);
             case "ternary_expression" -> new cTernaryExpressionParser(program, node);
             case "unary_expression" -> new cUnaryExpressionParser(program, node);
+
             // stmt
+            case "c_style_for_statement" -> new cCStyleForStatementParser(program, node);
+            case "case_statement" -> new cCaseStatementParser(program, node);
+            case "command" -> new cCommandParser(program, node);
+            case "compound_statement" -> new cCompoundStatementParser(program, node);
+            case "declaration_command" -> new cDeclarationCommandParser(program, node);
+            case "for_statement" -> new cForStatementParser(program, node);
+            case "function_definition" -> new cFunctionDefinitionParser(program, node);
+            case "if_statement" -> new cIfStatementParser(program, node);
+            case "list" -> new cListParser(program, node);
+            case "negated_command" -> new cNegatedCommandParser(program, node);
+            case "pipeline" -> new cPipelineParser(program, node);
+            case "redirected_statement" -> new cRedirectedStatementParser(program, node);
+            case "subshell" -> new cSubshellParser(program, node);
+            case "test_command" -> new cTestCommandParser(program, node);
+            case "unset_command" -> new cUnsetCommandParser(program, node);
+            case "variable_assignment" -> new cVariableAssignmentParser(program, node);
+            case "variable_assignments" -> new cVariableAssignmentsParser(program, node);
+            case "while_statement" -> new cWhileStatementParser(program, node);
 
-
-
-            // util
+            // other
+            case "array" -> new cArrayParser(program, node);
+            case "case_item" -> new cCaseItemParser(program, node);
+            case "command_name" -> new cCommandNameParser(program, node);
+            case "do_group" -> new cDoGroupParser(program, node);
+            case "elif_clause" -> new cElifClauseParser(program, node);
+            case "else_clause" -> new cElseClauseParser(program, node);
+            case "extglob_pattern" -> new cExtglobPatternParser(program, node);
+            case "file_descriptor" -> new cFileDescriptorParser(program, node);
+            case "file_redirect" -> new cFileRedirectParser(program, node);
+            case "heredoc_body" -> new cHeredocBodyParser(program, node);
+            case "heredoc_content" -> new cHeredocContentParser(program, node);
+            case "heredoc_end" -> new cHeredocEndParser(program, node);
+            case "heredoc_redirect" -> new cHeredocRedirectParser(program, node);
+            case "heredoc_start" -> new cHeredocStartParser(program, node);
+            case "herestring_redirect" -> new cHerestringRedirectParser(program, node);
+            case "subscript" -> new cSubscriptParser(program, node);
             case "special_variable_name" -> new cSpecialVariableNameParser(program, node);
             case "variable_name" -> new cVariableNameParser(program, node);
             case "regex" -> new cRegexParser(program, node);
 
 
-            default -> throw new IllegalStateException("unknown stmt");
+            default -> throw new IllegalStateException("unknown tree sitter node type : " + node.getType());
         };
 
     }
@@ -80,7 +119,7 @@ public abstract class cBaseParser implements cParser {
 
     public SyntaxInfo extractSyntaxInfo(TSNode tsNode) {
         SourceSpan span = new SourceSpan(tsNode.getStartByte(), tsNode.getEndByte());
-        String text = this.getProgramByOffsets();
+        String text = this.getProgramByOffsets(tsNode);
         SyntaxInfo syntaxInfo = new SyntaxInfo(span, text);
         return syntaxInfo;
     }
@@ -92,6 +131,18 @@ public abstract class cBaseParser implements cParser {
                             .formatted(tsTypeName, node.getType())
             );
         }
+    }
+
+    public boolean isMissing(TSNode node) {
+        return node == null || node.isNull();
+    }
+
+    public AstNode parseChild(TSNode node) {
+        if (node.isNamed()) {
+            return this.dispatcher(node).parse(node);
+        }
+
+        return new BaseAstNode(this.extractSyntaxInfo(node));
     }
 
     public List<AstNode> collectNamedChildren(TSNode tsNode){

@@ -23,7 +23,7 @@ public class cWhileStatementParser extends cBaseParser {
         LoopKind loopKind = syntaxInfo.raw().stripLeading().startsWith("until")
                 ? LoopKind.UNTIL
                 : LoopKind.WHILE;
-        List<StmtNode> condition = new ArrayList<>();
+        List<AstNode> condition = new ArrayList<>();
 
         for (TSNode child : this.getChildrenByFieldName(tsNode, "condition")) {
             if (child.isNamed()) {

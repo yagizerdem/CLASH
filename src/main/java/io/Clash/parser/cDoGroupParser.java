@@ -14,9 +14,9 @@ public class cDoGroupParser extends cBaseParser {
 
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "do_group");
-        List<StmtNode> statements = new ArrayList<>();
+        List<AstNode> statements = new ArrayList<>();
         for (int i = 0; i < tsNode.getNamedChildCount(); i++) {
-            statements.add((StmtNode) this.parseChild(tsNode.getNamedChild(i)));
+            statements.add(this.parseChild(tsNode.getNamedChild(i)));
         }
         return new DoGroupNode(this.extractSyntaxInfo(), statements);
     }

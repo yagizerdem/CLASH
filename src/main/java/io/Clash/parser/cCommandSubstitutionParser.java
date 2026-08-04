@@ -23,8 +23,9 @@ public class cCommandSubstitutionParser extends cBaseParser {
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
 
         TSNode tsRedirectNode = tsNode.getChildByFieldName("redirect");
-
-        AstNode fileRedirectNode = this.dispatcher(tsRedirectNode).parse(tsRedirectNode);
+        AstNode fileRedirectNode = this.isMissing(tsRedirectNode)
+                ? null
+                : this.parseChild(tsRedirectNode);
         List<AstNode> parts = this.collectNamedChildren(tsNode);
 
         return new CommandSubstitutionNode(syntaxInfo, parts, fileRedirectNode);

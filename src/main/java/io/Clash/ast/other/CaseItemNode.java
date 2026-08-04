@@ -9,13 +9,13 @@ import java.util.List;
 
 public final class CaseItemNode extends BaseAstNode {
     private final List<AstNode> values;
-    private final List<StmtNode> statements;
+    private final List<AstNode> statements;
     private final String terminator;
 
     public CaseItemNode(
             SyntaxInfo syntax,
             List<AstNode> values,
-            List<StmtNode> statements,
+            List<AstNode> statements,
             String terminator
     ) {
         super(syntax);
@@ -28,7 +28,7 @@ public final class CaseItemNode extends BaseAstNode {
         return values;
     }
 
-    public List<StmtNode> statements() {
+    public List<AstNode> statements() {
         return statements;
     }
 

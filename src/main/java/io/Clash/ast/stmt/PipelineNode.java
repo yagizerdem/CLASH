@@ -1,5 +1,6 @@
 package io.Clash.ast.stmt;
 
+import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.StatementNodeType;
 import io.Clash.ast.base.StmtNode;
 import io.Clash.ast.base.SyntaxInfo;
@@ -7,12 +8,12 @@ import io.Clash.ast.base.SyntaxInfo;
 import java.util.List;
 
 public final class PipelineNode extends StmtNode {
-    private final List<StmtNode> commands;
+    private final List<AstNode> commands;
     private final List<PipeOperator> operators;
 
     public PipelineNode(
             SyntaxInfo syntax,
-            List<StmtNode> commands,
+            List<AstNode> commands,
             List<PipeOperator> operators
     ) {
         super(syntax, StatementNodeType.PIPELINE);
@@ -20,7 +21,7 @@ public final class PipelineNode extends StmtNode {
         this.operators = StmtNode.list(operators, "operators");
     }
 
-    public List<StmtNode> commands() {
+    public List<AstNode> commands() {
         return commands;
     }
 

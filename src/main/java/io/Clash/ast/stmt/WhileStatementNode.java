@@ -9,13 +9,13 @@ import java.util.List;
 
 public final class WhileStatementNode extends StmtNode {
     private final LoopKind loopKind;
-    private final List<StmtNode> condition;
+    private final List<AstNode> condition;
     private final AstNode body;
 
     public WhileStatementNode(
             SyntaxInfo syntax,
             LoopKind loopKind,
-            List<StmtNode> condition,
+            List<AstNode> condition,
             AstNode body
     ) {
         super(syntax, StatementNodeType.WHILE_STATEMENT);
@@ -28,7 +28,7 @@ public final class WhileStatementNode extends StmtNode {
         return loopKind;
     }
 
-    public List<StmtNode> condition() {
+    public List<AstNode> condition() {
         return condition;
     }
 

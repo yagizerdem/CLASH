@@ -15,7 +15,7 @@ public class cCaseItemParser extends cBaseParser {
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "case_item");
         List<AstNode> values = new ArrayList<>();
-        List<StmtNode> statements = new ArrayList<>();
+        List<AstNode> statements = new ArrayList<>();
 
         for (TSNode child : this.getChildrenByFieldName(tsNode, "value")) {
             values.add(this.parseChild(child));

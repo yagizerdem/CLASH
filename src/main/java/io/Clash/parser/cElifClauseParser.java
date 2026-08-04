@@ -15,8 +15,8 @@ public class cElifClauseParser extends cBaseParser {
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "elif_clause");
         int thenOffset = this.findThenOffset(tsNode);
-        List<StmtNode> condition = new ArrayList<>();
-        List<StmtNode> thenBranch = new ArrayList<>();
+        List<AstNode> condition = new ArrayList<>();
+        List<AstNode> thenBranch = new ArrayList<>();
 
         for (int i = 0; i < tsNode.getNamedChildCount(); i++) {
             TSNode child = tsNode.getNamedChild(i);

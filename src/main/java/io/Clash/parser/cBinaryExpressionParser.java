@@ -20,13 +20,16 @@ public class cBinaryExpressionParser extends cBaseParser {
         this.checkType(tsNode, "binary_expression");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
         TSNode tsLeftNode = tsNode.getChildByFieldName("left");
-        String operator = this.getProgramByOffsets(tsNode.getChildByFieldName("operator"));
+        TSNode tsOperatorNode = tsNode.getChildByFieldName("operator");
+        String operator = this.getProgramByOffsets(tsOperatorNode);
         List<TSNode> tsRightNodes = this.getChildrenByFieldName(tsNode, "right");
 
-        AstNode cLeftNode = this.dispatcher(tsLeftNode).parse(tsLeftNode);
+        AstNode cLeftNode = this.isMissing(tsLeftNode)
+                ? null
+                : this.parseChild(tsLeftNode);
         List<AstNode> cRightNodes = new ArrayList<>();
         tsRightNodes.forEach(tsn -> {
-            cRightNodes.add(this.dispatcher(tsn).parse(tsn));
+            cRightNodes.add(this.parseChild(tsn));
         });
 
         return new BinaryExpressionNode(syntaxInfo, cLeftNode, operator, cRightNodes);

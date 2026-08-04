@@ -8,6 +8,7 @@ import io.Clash.parser.*;
 import io.Clash.parser.root.cProgramParse;
 import org.treesitter.TSNode;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,14 +32,21 @@ public abstract class cBaseParser implements cParser {
     }
 
     public String getProgramByOffsets() {
-        return this.program.substring(tsNode.getStartByte(), tsNode.getEndByte());
+        return this.getProgramByOffsets(tsNode);
     }
 
     public String getProgramByOffsets(TSNode tsNode) {
-        return this.program.substring(tsNode.getStartByte(), tsNode.getEndByte());
+        byte[] utf8 = this.program.getBytes(StandardCharsets.UTF_8);
+        int start = tsNode.getStartByte();
+        int end = tsNode.getEndByte();
+        return new String(utf8, start, end - start, StandardCharsets.UTF_8);
     }
 
     public cBaseParser dispatcher(TSNode node) {
+        if (this.isMissing(node)) {
+            throw new IllegalArgumentException("Cannot dispatch a missing Tree-sitter node");
+        }
+
         return switch (node.getType()) {
             // root
             case "program" -> new cProgramParse(program, node);
@@ -130,6 +138,10 @@ public abstract class cBaseParser implements cParser {
     }
 
     public void checkType(TSNode node, String tsTypeName) {
+        if (this.isMissing(node)) {
+            throw new IllegalArgumentException("Expected node type '" + tsTypeName + "', but node is missing");
+        }
+
         if (!node.getType().equals(tsTypeName)) {
             throw new IllegalArgumentException(
                     "Expected node type '%s', but got '%s'"
@@ -143,6 +155,10 @@ public abstract class cBaseParser implements cParser {
     }
 
     public AstNode parseChild(TSNode node) {
+        if (this.isMissing(node)) {
+            throw new IllegalArgumentException("Cannot parse a missing Tree-sitter child node");
+        }
+
         if (node.isNamed()) {
             return this.dispatcher(node).parse(node);
         }

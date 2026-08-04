@@ -14,7 +14,7 @@ public class cElseClauseParser extends cBaseParser {
 
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "else_clause");
-        List<StmtNode> statements = new ArrayList<>();
+        List<AstNode> statements = new ArrayList<>();
         for (int i = 0; i < tsNode.getNamedChildCount(); i++) {
             statements.add((StmtNode) this.parseChild(tsNode.getNamedChild(i)));
         }

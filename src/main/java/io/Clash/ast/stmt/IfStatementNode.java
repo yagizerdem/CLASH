@@ -8,15 +8,15 @@ import io.Clash.ast.base.SyntaxInfo;
 import java.util.List;
 
 public final class IfStatementNode extends StmtNode {
-    private final List<StmtNode> condition;
-    private final List<StmtNode> thenBranch;
+    private final List<AstNode> condition;
+    private final List<AstNode> thenBranch;
     private final List<AstNode> elifClauses;
     private final AstNode elseClause;
 
     public IfStatementNode(
             SyntaxInfo syntax,
-            List<StmtNode> condition,
-            List<StmtNode> thenBranch,
+            List<AstNode> condition,
+            List<AstNode> thenBranch,
             List<AstNode> elifClauses,
             AstNode elseClause
     ) {
@@ -27,11 +27,11 @@ public final class IfStatementNode extends StmtNode {
         this.elseClause = elseClause;
     }
 
-    public List<StmtNode> condition() {
+    public List<AstNode> condition() {
         return condition;
     }
 
-    public List<StmtNode> thenBranch() {
+    public List<AstNode> thenBranch() {
         return thenBranch;
     }
 

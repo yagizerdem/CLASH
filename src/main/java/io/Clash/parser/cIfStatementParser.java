@@ -19,8 +19,8 @@ public class cIfStatementParser extends cBaseParser {
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "if_statement");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
-        List<StmtNode> condition = new ArrayList<>();
-        List<StmtNode> thenBranch = new ArrayList<>();
+        List<AstNode> condition = new ArrayList<>();
+        List<AstNode> thenBranch = new ArrayList<>();
         List<AstNode> elifClauses = new ArrayList<>();
         AstNode elseClause = null;
 

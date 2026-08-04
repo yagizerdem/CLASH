@@ -20,7 +20,9 @@ public class cRedirectedStatementParser extends cBaseParser {
         this.checkType(tsNode, "redirected_statement");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
         TSNode tsBody = tsNode.getChildByFieldName("body");
-        StmtNode body = tsBody == null ? null : (StmtNode) this.parseChild(tsBody);
+        StmtNode body = this.isMissing(tsBody)
+                ? null
+                : (StmtNode) this.parseChild(tsBody);
         List<AstNode> redirects = new ArrayList<>();
 
         for (TSNode child : this.getChildrenByFieldName(tsNode, "redirect")) {

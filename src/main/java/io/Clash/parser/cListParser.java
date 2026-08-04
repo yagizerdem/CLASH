@@ -20,13 +20,13 @@ public class cListParser extends cBaseParser {
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "list");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
-        List<StmtNode> statements = new ArrayList<>();
+        List<AstNode> statements = new ArrayList<>();
         List<ListOperator> operators = new ArrayList<>();
 
         for (int i = 0; i < tsNode.getChildCount(); i++) {
             TSNode child = tsNode.getChild(i);
             if (child.isNamed()) {
-                statements.add((StmtNode) this.parseChild(child));
+                statements.add(this.parseChild(child));
             } else {
                 ListOperator operator = this.parseOperator(this.getProgramByOffsets(child));
                 if (operator != null) {

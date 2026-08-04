@@ -20,7 +20,7 @@ public class cPipelineParser extends cBaseParser {
     public AstNode parse(TSNode tsNode) {
         this.checkType(tsNode, "pipeline");
         SyntaxInfo syntaxInfo = this.extractSyntaxInfo();
-        List<StmtNode> commands = new ArrayList<>();
+        List<AstNode> commands = new ArrayList<>();
         List<PipeOperator> operators = new ArrayList<>();
 
         for (int i = 0; i < tsNode.getChildCount(); i++) {

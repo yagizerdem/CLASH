@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+process_group() {
+    local group="$1"
+    shift
+
+    (
+        for item in "$@"; do
+            if [[ -n "$item" ]]; then
+                case "$item" in
+                    *.java)
+                        echo "$group:java:$item"
+                        ;;
+                    *.sh)
+                        echo "$group:shell:$item"
+                        ;;
+                    *)
+                        echo "$group:other:$item"
+                        ;;
+                esac
+            fi
+        done
+    ) | sort
+}
+
+groups=(core parser tests)
+for group in "${groups[@]}"; do
+    process_group "$group" "Main.java" "build.sh" "README.md"
+done
+
+{
+    echo "completed=${#groups[@]}"

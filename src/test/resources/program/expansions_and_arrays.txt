@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+declare -a services=(api worker scheduler)
+declare -A ports=([api]=8080 [worker]=8081 [scheduler]=8082)
+prefix="${APP_PREFIX:-clash}"
+
+for service in "${services[@]}"; do
+    port="${ports[$service]}"
+    endpoint="${prefix}-${service}:$((port + 1000))"
+    upper_name="${service^^}"
+    printf '%s=%s\n' "$upper_name" "$endpoint"
+done
+
+joined="$(printf '%s,' "${services[@]}")"
+joined="${joined%,}"
+escaped=$'first\nsecond\tcolumn'
+fallback="${MISSING_VALUE:-${prefix}-default}"
+echo "joined=$joined fallback=$fallback"

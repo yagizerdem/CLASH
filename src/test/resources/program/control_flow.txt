@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+classify_number() {
+    local value="$1"
+
+    if [[ $value -lt 0 ]]; then
+        echo "negative:$value"
+    elif [[ $value -eq 0 ]]; then
+        echo "zero"
+    else
+        echo "positive:$value"
+    fi
+}
+
+for value in -2 0 3 8; do
+    classify_number "$value"
+done
+
+for ((index = 0; index < 4; index++)); do
+    echo "index=$index"
+done
+
+attempt=0
+while [[ $attempt -lt 3 ]]; do
+    ((attempt++))
+    echo "attempt=$attempt"
+done

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+input_file="${1:-input.log}"
+output_file="${2:-summary.log}"
+
+grep -E "ERROR|WARN" "$input_file" \
+    | sed 's/^[[:space:]]*//' \
+    | sort \
+    | uniq -c \
+    > "$output_file"
+
+wc -l < "$output_file" 2>> parser-errors.log
+printf '%s\n' "alpha" "beta" "alpha" | sort -u >> "$output_file"
+read -r first second <<< "left right"
+diff <(sort "$input_file") <(sort "$output_file") || echo "files differ"
+! grep -q "FATAL" "$output_file" && echo "no fatal entries"

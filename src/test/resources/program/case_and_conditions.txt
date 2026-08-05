@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+mode="${1:-development}"
+target="${2:-src/main.sh}"
+
+case "$mode" in
+    development|dev)
+        flags=(--verbose --trace)
+        ;;
+    production|prod)
+        flags=(--quiet)
+        ;;
+    test*)
+        flags=(--dry-run --verbose)
+        ;;
+    *)
+        echo "unknown mode: $mode" >&2
+        flags=(--help)
+        ;;
+esac
+
+if [[ -f "$target" && "$target" == *.sh ]]; then
+    echo "shell target"
+elif [[ -d "$target" || -L "$target" ]]; then
+    echo "directory or link"
+else
+    echo "other target"
+fi
+
+[[ "$mode" =~ ^(dev|prod|test) ]] && printf 'flags: %s\n' "${flags[*]}"

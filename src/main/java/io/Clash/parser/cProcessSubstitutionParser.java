@@ -2,7 +2,6 @@ package io.Clash.parser;
 
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.SyntaxInfo;
-import io.Clash.ast.other.ParenthesizedExpressionNode;
 import io.Clash.ast.primaryExpr.ProcessSubstitutionNode;
 import io.Clash.parser.core.cBaseParser;
 import org.treesitter.TSNode;

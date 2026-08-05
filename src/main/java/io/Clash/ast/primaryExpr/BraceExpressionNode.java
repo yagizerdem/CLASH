@@ -1,5 +1,7 @@
 package io.Clash.ast.primaryExpr;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.ExpressionNodeType;
 import io.Clash.ast.base.ExprNode;
@@ -21,5 +23,10 @@ public final class BraceExpressionNode extends PrimaryExprNode {
 
     public List<AstNode> elements() {
         return elements;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitBraceExpression(this);
     }
 }

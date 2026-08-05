@@ -1,5 +1,7 @@
 package io.Clash.ast.stmt;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.StatementNodeType;
 import io.Clash.ast.base.StmtNode;
 import io.Clash.ast.base.SyntaxInfo;
@@ -19,5 +21,10 @@ public final class VariableAssignmentsNode extends StmtNode {
 
     public List<VariableAssignmentNode> assignments() {
         return assignments;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitVariableAssignments(this);
     }
 }

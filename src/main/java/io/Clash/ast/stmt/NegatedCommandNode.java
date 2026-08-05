@@ -1,5 +1,7 @@
 package io.Clash.ast.stmt;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.StatementNodeType;
 import io.Clash.ast.base.StmtNode;
@@ -18,5 +20,10 @@ public final class NegatedCommandNode extends StmtNode {
 
     public AstNode command() {
         return command;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitNegatedCommand(this);
     }
 }

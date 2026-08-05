@@ -4,6 +4,7 @@ import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.ExpressionNodeType;
 import io.Clash.ast.base.ExprNode;
 import io.Clash.ast.base.SyntaxInfo;
+import io.Clash.ast.visitor.Ivisitor;
 
 import java.util.List;
 
@@ -34,5 +35,10 @@ public final class BinaryExpressionNode extends ExprNode {
 
     public List<AstNode> right() {
         return right;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitBinaryExpression(this);
     }
 }

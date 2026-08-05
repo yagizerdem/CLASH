@@ -1,5 +1,7 @@
 package io.Clash.ast.other;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.BaseAstNode;
 import io.Clash.ast.base.SyntaxInfo;
@@ -16,5 +18,10 @@ public final class ArrayNode extends BaseAstNode {
 
     public List<AstNode> elements() {
         return elements;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitArray(this);
     }
 }

@@ -1,6 +1,8 @@
 package io.Clash.parser.core;
 
+import io.Clash.ast.ProgramNode;
 import io.Clash.ast.base.AstNode;
+import io.Clash.ast.base.SyntaxInfo;
 import org.treesitter.*;
 
 import java.util.ArrayList;
@@ -26,14 +28,16 @@ public class BashParser extends cBaseParser {
     }
 
     // parser program
-    public List<AstNode> parse(TSTree tree) {
+    public AstNode parse(TSTree tree) {
         TSNode root = tree.getRootNode();
         List<AstNode> stmts = new ArrayList<>();
+        SyntaxInfo syntaxInfo = this.extractSyntaxInfo(root);
         for(int i = 0; i < root.getChildCount(); i++) {
             cBaseParser parser = dispatcher(root.getChild(i));
             stmts.add(parser.parse(root.getChild(i)));
         }
-        return stmts;
+
+        return new ProgramNode(syntaxInfo, stmts);
     }
 
 

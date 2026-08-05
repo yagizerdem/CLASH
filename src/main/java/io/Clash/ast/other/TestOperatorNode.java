@@ -1,5 +1,7 @@
 package io.Clash.ast.other;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.BaseAstNode;
 import io.Clash.ast.base.SyntaxInfo;
 
@@ -13,5 +15,10 @@ public final class TestOperatorNode extends BaseAstNode {
 
     public String operator() {
         return operator;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitTestOperator(this);
     }
 }

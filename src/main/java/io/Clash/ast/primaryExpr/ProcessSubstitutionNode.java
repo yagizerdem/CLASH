@@ -1,5 +1,7 @@
 package io.Clash.ast.primaryExpr;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.*;
 
 import java.util.List;
@@ -24,5 +26,10 @@ public final class ProcessSubstitutionNode extends PrimaryExprNode {
 
     public List<AstNode> statements() {
         return statements;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitProcessSubstitution(this);
     }
 }

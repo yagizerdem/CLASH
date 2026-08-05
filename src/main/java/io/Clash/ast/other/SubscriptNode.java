@@ -1,5 +1,7 @@
 package io.Clash.ast.other;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.BaseAstNode;
 import io.Clash.ast.base.SyntaxInfo;
@@ -27,4 +29,9 @@ public final class SubscriptNode extends BaseAstNode {
     public AstNode name() { return name; }
     public AstNode index() { return index; }
     public List<AstNode> suffix() { return suffix; }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitSubscript(this);
+    }
 }

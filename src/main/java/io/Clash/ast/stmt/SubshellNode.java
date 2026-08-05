@@ -1,5 +1,7 @@
 package io.Clash.ast.stmt;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.StatementNodeType;
 import io.Clash.ast.base.StmtNode;
@@ -20,5 +22,10 @@ public final class SubshellNode extends StmtNode {
 
     public List<AstNode> statements() {
         return statements;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitSubshell(this);
     }
 }

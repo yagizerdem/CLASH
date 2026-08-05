@@ -1,9 +1,6 @@
 package io.Clash.parser.core;
 
-import io.Clash.ast.base.AstNode;
-import io.Clash.ast.base.BaseAstNode;
-import io.Clash.ast.base.SourceSpan;
-import io.Clash.ast.base.SyntaxInfo;
+import io.Clash.ast.base.*;
 import io.Clash.parser.*;
 import io.Clash.parser.root.cProgramParse;
 import org.treesitter.TSNode;
@@ -163,7 +160,7 @@ public abstract class cBaseParser implements cParser {
             return this.dispatcher(node).parse(node);
         }
 
-        return new BaseAstNode(this.extractSyntaxInfo(node));
+        return new ConcreteBaseAstNode(this.extractSyntaxInfo(node));
     }
 
     public List<AstNode> collectNamedChildren(TSNode tsNode){

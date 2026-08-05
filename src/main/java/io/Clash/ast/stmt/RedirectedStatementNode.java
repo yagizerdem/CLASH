@@ -1,5 +1,7 @@
 package io.Clash.ast.stmt;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.StatementNodeType;
 import io.Clash.ast.base.StmtNode;
@@ -27,5 +29,10 @@ public final class RedirectedStatementNode extends StmtNode {
 
     public List<AstNode> redirects() {
         return redirects;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitRedirectedStatement(this);
     }
 }

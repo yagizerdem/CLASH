@@ -1,5 +1,7 @@
 package io.Clash.ast.other;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.BaseAstNode;
 import io.Clash.ast.base.StmtNode;
@@ -44,4 +46,9 @@ public final class HeredocRedirectNode extends BaseAstNode {
     public List<AstNode> redirects() { return redirects; }
     public StmtNode right() { return right; }
     public List<AstNode> parts() { return parts; }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitHeredocRedirect(this);
+    }
 }

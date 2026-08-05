@@ -1,5 +1,7 @@
 package io.Clash.ast.primaryExpr;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.ExpressionNodeType;
 import io.Clash.ast.base.ExprNode;
@@ -19,5 +21,10 @@ public final class SimpleExpansionNode extends PrimaryExprNode {
 
     public AstNode getVariable() {
         return variable;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitSimpleExpansion(this);
     }
 }

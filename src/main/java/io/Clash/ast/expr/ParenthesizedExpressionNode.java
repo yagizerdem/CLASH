@@ -1,5 +1,7 @@
 package io.Clash.ast.expr;
 
+import io.Clash.ast.visitor.Ivisitor;
+
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.ExpressionNodeType;
 import io.Clash.ast.base.ExprNode;
@@ -18,5 +20,10 @@ public final class ParenthesizedExpressionNode extends ExprNode {
 
     public AstNode expression() {
         return expression;
+    }
+
+    @Override
+    public <T> T visit(Ivisitor visitor) {
+        return visitor.visitParenthesizedExpression(this);
     }
 }

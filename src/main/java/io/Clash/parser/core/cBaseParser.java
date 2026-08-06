@@ -160,7 +160,10 @@ public abstract class cBaseParser implements cParser {
             return this.dispatcher(node).parse(node);
         }
 
-        return new ConcreteBaseAstNode(this.extractSyntaxInfo(node));
+        cBaseParser parser = this.dispatcher(node);
+        AstNode childNode = parser.parse(node);
+
+        return childNode;
     }
 
     public List<AstNode> collectNamedChildren(TSNode tsNode){

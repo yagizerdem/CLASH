@@ -78,6 +78,11 @@ public class Main {
 
            var a = 10;
 
+           AstPrinter printer =  new AstPrinter();
+           String  ser = node.visit(printer);
+           System.out.println(ser);
+
+
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

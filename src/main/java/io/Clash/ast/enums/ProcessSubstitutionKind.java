@@ -1,4 +1,4 @@
-package io.Clash.ast.primaryExpr;
+package io.Clash.ast.enums;
 
 public enum ProcessSubstitutionKind {
     INPUT,

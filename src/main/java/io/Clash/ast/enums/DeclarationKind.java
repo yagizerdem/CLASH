@@ -1,4 +1,4 @@
-package io.Clash.ast.stmt;
+package io.Clash.ast.enums;
 
 public enum DeclarationKind {
     DECLARE,

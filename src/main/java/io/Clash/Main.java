@@ -10,8 +10,10 @@ public class Main {
     public static void main(String[] args) {
         try {
             String source = """
-                    echo hit $(name) 
-                    echo hit                    
+                    cat <<- A
+                    This is line 1.
+                    This is line 2. 
+                    A
                     """;
 
             BashParser parser = new BashParser(source);

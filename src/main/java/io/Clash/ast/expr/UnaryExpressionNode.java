@@ -3,7 +3,7 @@ package io.Clash.ast.expr;
 import io.Clash.ast.visitor.Ivisitor;
 
 import io.Clash.ast.base.AstNode;
-import io.Clash.ast.base.ExpressionNodeType;
+import io.Clash.ast.enums.ExpressionNodeType;
 import io.Clash.ast.base.ExprNode;
 import io.Clash.ast.base.SyntaxInfo;
 

@@ -1,6 +1,7 @@
 package io.Clash.parser;
 
 import io.Clash.ast.base.AstNode;
+import io.Clash.ast.enums.RedirectionKind;
 import io.Clash.ast.other.FileRedirectNode;
 import io.Clash.parser.core.cBaseParser;
 import org.treesitter.TSNode;
@@ -28,7 +29,7 @@ public class cFileRedirectParser extends cBaseParser {
         return new FileRedirectNode(
                 this.extractSyntaxInfo(),
                 descriptor,
-                this.findOperator(tsNode),
+                RedirectionKind.fromSymbol(this.findOperator(tsNode)),
                 destinations
         );
     }

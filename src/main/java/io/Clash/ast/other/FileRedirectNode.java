@@ -1,5 +1,6 @@
 package io.Clash.ast.other;
 
+import io.Clash.ast.enums.RedirectionKind;
 import io.Clash.ast.visitor.Ivisitor;
 
 import io.Clash.ast.base.AstNode;
@@ -11,8 +12,20 @@ import java.util.Objects;
 
 public final class FileRedirectNode extends BaseAstNode {
     private final AstNode descriptor;
-    private final String operator;
+    private final RedirectionKind operator;
     private final List<AstNode> destinations;
+
+    public FileRedirectNode(
+            SyntaxInfo syntax,
+            AstNode descriptor,
+            RedirectionKind redirectionKind,
+            List<AstNode> destinations
+    ) {
+        super(syntax);
+        this.descriptor = descriptor;
+        this.operator = Objects.requireNonNull(redirectionKind);
+        this.destinations = List.copyOf(destinations);
+    }
 
     public FileRedirectNode(
             SyntaxInfo syntax,
@@ -22,7 +35,7 @@ public final class FileRedirectNode extends BaseAstNode {
     ) {
         super(syntax);
         this.descriptor = descriptor;
-        this.operator = Objects.requireNonNull(operator, "operator");
+        this.operator = RedirectionKind.fromSymbol(Objects.requireNonNull(operator, "operator"));
         this.destinations = List.copyOf(destinations);
     }
 
@@ -30,7 +43,7 @@ public final class FileRedirectNode extends BaseAstNode {
         return descriptor;
     }
 
-    public String operator() {
+    public RedirectionKind operator() {
         return operator;
     }
 

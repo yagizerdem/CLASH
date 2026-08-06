@@ -2,6 +2,7 @@ package io.Clash.parser;
 
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.StmtNode;
+import io.Clash.ast.enums.RedirectionKind;
 import io.Clash.ast.other.HeredocRedirectNode;
 import io.Clash.parser.core.cBaseParser;
 import org.treesitter.TSNode;
@@ -34,7 +35,7 @@ public class cHeredocRedirectParser extends cBaseParser {
         return new HeredocRedirectNode(
                 this.extractSyntaxInfo(),
                 descriptor,
-                this.findRedirectOperator(tsNode),
+                RedirectionKind.fromSymbol(this.findRedirectOperator(tsNode)),
                 arguments,
                 operator,
                 redirects,

@@ -1,10 +1,9 @@
 package io.Clash.parser;
 
 import io.Clash.ast.base.AstNode;
-import io.Clash.ast.base.StmtNode;
 import io.Clash.ast.base.SyntaxInfo;
 import io.Clash.ast.stmt.ListNode;
-import io.Clash.ast.stmt.ListOperator;
+import io.Clash.ast.enums.ListOperator;
 import io.Clash.parser.core.cBaseParser;
 import org.treesitter.TSNode;
 

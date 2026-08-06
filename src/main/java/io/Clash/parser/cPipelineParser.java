@@ -3,7 +3,7 @@ package io.Clash.parser;
 import io.Clash.ast.base.AstNode;
 import io.Clash.ast.base.StmtNode;
 import io.Clash.ast.base.SyntaxInfo;
-import io.Clash.ast.stmt.PipeOperator;
+import io.Clash.ast.enums.PipeOperator;
 import io.Clash.ast.stmt.PipelineNode;
 import io.Clash.parser.core.cBaseParser;
 import org.treesitter.TSNode;

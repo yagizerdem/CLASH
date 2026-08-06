@@ -1,9 +1,10 @@
 package io.Clash.ast.stmt;
 
+import io.Clash.ast.enums.ListOperator;
 import io.Clash.ast.visitor.Ivisitor;
 
 import io.Clash.ast.base.AstNode;
-import io.Clash.ast.base.StatementNodeType;
+import io.Clash.ast.enums.StatementNodeType;
 import io.Clash.ast.base.StmtNode;
 import io.Clash.ast.base.SyntaxInfo;
 

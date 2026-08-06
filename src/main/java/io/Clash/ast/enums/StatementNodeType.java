@@ -1,5 +1,6 @@
-package io.Clash.ast.base;
+package io.Clash.ast.enums;
 
+import io.Clash.ast.base.StmtNode;
 import io.Clash.ast.stmt.*;
 
 import java.util.Arrays;

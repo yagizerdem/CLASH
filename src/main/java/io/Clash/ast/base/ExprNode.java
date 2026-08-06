@@ -1,5 +1,7 @@
 package io.Clash.ast.base;
 
+import io.Clash.ast.enums.ExpressionNodeType;
+
 import java.util.List;
 import java.util.Objects;
 

@@ -1,5 +1,6 @@
-package io.Clash.ast.base;
+package io.Clash.ast.enums;
 
+import io.Clash.ast.base.ExprNode;
 import io.Clash.ast.expr.*;
 import io.Clash.ast.primaryExpr.*;
 

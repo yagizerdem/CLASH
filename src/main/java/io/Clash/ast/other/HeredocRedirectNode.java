@@ -1,5 +1,6 @@
 package io.Clash.ast.other;
 
+import io.Clash.ast.enums.RedirectionKind;
 import io.Clash.ast.visitor.Ivisitor;
 
 import io.Clash.ast.base.AstNode;
@@ -12,7 +13,7 @@ import java.util.Objects;
 
 public final class HeredocRedirectNode extends BaseAstNode {
     private final AstNode descriptor;
-    private final String redirectOperator;
+    private final RedirectionKind redirectOperator;
     private final List<AstNode> arguments;
     private final String operator;
     private final List<AstNode> redirects;
@@ -31,6 +32,26 @@ public final class HeredocRedirectNode extends BaseAstNode {
     ) {
         super(syntax);
         this.descriptor = descriptor;
+        this.redirectOperator = RedirectionKind.fromSymbol(Objects.requireNonNull(redirectOperator, "redirectOperator"));
+        this.arguments = List.copyOf(arguments);
+        this.operator = operator;
+        this.redirects = List.copyOf(redirects);
+        this.right = right;
+        this.parts = List.copyOf(parts);
+    }
+
+    public HeredocRedirectNode(
+            SyntaxInfo syntax,
+            AstNode descriptor,
+            RedirectionKind redirectOperator,
+            List<AstNode> arguments,
+            String operator,
+            List<AstNode> redirects,
+            StmtNode right,
+            List<AstNode> parts
+    ) {
+        super(syntax);
+        this.descriptor = descriptor;
         this.redirectOperator = Objects.requireNonNull(redirectOperator, "redirectOperator");
         this.arguments = List.copyOf(arguments);
         this.operator = operator;
@@ -39,8 +60,10 @@ public final class HeredocRedirectNode extends BaseAstNode {
         this.parts = List.copyOf(parts);
     }
 
+
+
     public AstNode descriptor() { return descriptor; }
-    public String redirectOperator() { return redirectOperator; }
+    public RedirectionKind redirectOperator() { return redirectOperator; }
     public List<AstNode> arguments() { return arguments; }
     public String operator() { return operator; }
     public List<AstNode> redirects() { return redirects; }

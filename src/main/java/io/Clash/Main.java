@@ -3,8 +3,13 @@ package io.Clash;
 import io.Clash.ast.Util;
 import io.Clash.ast.base.AstNode;
 import io.Clash.parser.core.BashParser;
+import io.Clash.process.jvm.SimpleCommandExecutor;
+import io.Clash.process.model.SimpleCommand;
+import io.Clash.process.model.base.ExecutionResponse;
 import org.treesitter.TSNode;
 import org.treesitter.TSTree;
+
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -30,6 +35,18 @@ public class Main {
            String  ser = node.visit(printer);
            System.out.println(ser);
 
+            ShellContext context = new ShellContext();
+            cEnv env = new cEnv();
+            String cwd = System.getProperty("user.dir");
+            context.env = env;
+            context.cwd = cwd;
+
+            SimpleCommand cmd = new SimpleCommand(List.of("tasklist"), List.of());
+
+            SimpleCommandExecutor executor = new SimpleCommandExecutor(cmd, context);
+            ExecutionResponse response = executor.execCaptured();
+
+            System.out.println(response.getStdout());
 
         } catch (Exception ex) {
             System.out.println(ex.getMessage());

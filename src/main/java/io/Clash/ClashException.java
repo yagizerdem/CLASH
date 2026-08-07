@@ -13,12 +13,28 @@ public class ClashException extends RuntimeException {
     private final int line;
     private final int column;
 
-    public ClashException(ErrorType errorType, String message) {
-        super(message);
-        this.errorType = errorType;
-        this.fileName = null;
-        this.line = -1;
-        this.column = -1;
+    public ClashException(
+            ErrorType errorType,
+            String message
+    ) {
+        this(errorType, message, null, null, -1, -1);
+    }
+
+    public ClashException(
+            ErrorType errorType,
+            String message,
+            Throwable cause
+    ) {
+        this(errorType, message, cause, null, -1, -1);
+    }
+
+    public ClashException(
+            ErrorType errorType,
+            String message,
+            int line,
+            int column
+    ) {
+        this(errorType, message, null, null, line, column);
     }
 
     public ClashException(
@@ -28,22 +44,21 @@ public class ClashException extends RuntimeException {
             int line,
             int column
     ) {
-        super(message);
-        this.errorType = errorType;
-        this.fileName = fileName;
-        this.line = line;
-        this.column = column;
+        this(errorType, message, null, fileName, line, column);
     }
 
     public ClashException(
             ErrorType errorType,
             String message,
+            Throwable cause,
+            String fileName,
             int line,
             int column
     ) {
-        super(message);
+        super(message, cause);
+
         this.errorType = errorType;
-        this.fileName = null;
+        this.fileName = fileName;
         this.line = line;
         this.column = column;
     }
@@ -78,7 +93,13 @@ public class ClashException extends RuntimeException {
         }
 
         return "%s:%d:%d: %s error: %s"
-                .formatted(fileName, line, column, severity, rawMessage);
+                .formatted(
+                        fileName,
+                        line,
+                        column,
+                        severity,
+                        rawMessage
+                );
     }
 
     public String getRawMessage() {
@@ -86,6 +107,8 @@ public class ClashException extends RuntimeException {
     }
 
     private boolean hasSourceLocation() {
-        return fileName != null && line >= 0 && column >= 0;
+        return fileName != null
+                && line >= 0
+                && column >= 0;
     }
 }

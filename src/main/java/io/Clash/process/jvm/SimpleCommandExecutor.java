@@ -3,10 +3,12 @@ package io.Clash.process.jvm;
 import io.Clash.ClashException;
 import io.Clash.ShellContext;
 import io.Clash.process.jvm.core.StreamGobbler;
+import io.Clash.process.model.Redirection;
 import io.Clash.process.model.SimpleCommand;
 import io.Clash.process.model.base.ExecutionResponse;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 
 public class SimpleCommandExecutor {
@@ -59,6 +61,12 @@ public class SimpleCommandExecutor {
             .inheritIO()
             .directory(new File(context.cwd));
 
+            List<Redirection> redirections = model.getRedirections();
+            for(int i = 0; i < redirections.size(); i++) {
+                Redirection redirection = redirections.get(i);
+            }
+
+
             Process process = pb.start();
 
             process.waitFor();
@@ -79,13 +87,10 @@ public class SimpleCommandExecutor {
 
             pb.directory(new File(context.cwd));
 
-
-
             Process process = pb.start();
 
             StreamGobbler outGobbler = new StreamGobbler(process.getInputStream());
             StreamGobbler errGlobber = new StreamGobbler(process.getErrorStream());
-
 
             outGobbler.run();
             errGlobber.run();

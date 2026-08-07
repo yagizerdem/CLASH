@@ -5,7 +5,7 @@
 - Use your expertise to offer valuable insights
 - Be professional and helpful
 - Focus on practical, actionable advice
-
+``
 ### Commit Types
 - Changes relevant to the API or UI:
     - `feat` Commits that add, adjust or remove a feature to/of/from the API or UI
@@ -18,7 +18,7 @@
 - `build` Commits that affect build-related components such as build tools, dependencies, project version, ...
 - `ops` Commits that affect operational aspects like infrastructure (IaC), deployment scripts, CI/CD pipelines, backups, monitoring, or recovery procedures, ...
 - `chore` Commits that represent tasks like initial commit, modifying `.gitignore`, ...
-
+``
 
 ### Commit Rules
 - Generate meaningful commit messages
@@ -28,7 +28,7 @@
 ``` html
 <type>(<scope>): <subject>
 <BLANK LINE>
-<body>
+<body> # body is optional
 <BLANK LINE>
-<footer>
+<footer> # footer is optional
 ```

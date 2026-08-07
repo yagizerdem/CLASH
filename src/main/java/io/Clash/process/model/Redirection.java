@@ -15,12 +15,12 @@ public record Redirection(
         Objects.requireNonNull(target, "target");
         Objects.requireNonNull(targetDescriptor, "targetDescriptor");
 
-        if (sourceDescriptor.isPresent() && sourceDescriptor.getAsInt() < 0) {
-            throw new IllegalArgumentException("Source descriptor cannot be negative");
+        if (sourceDescriptor.isPresent() && !isStandardDescriptor(sourceDescriptor.getAsInt())) {
+            throw new IllegalArgumentException("Source descriptor must be 0, 1, or 2");
         }
 
-        if (targetDescriptor.isPresent() && targetDescriptor.getAsInt() < 0) {
-            throw new IllegalArgumentException("Target descriptor cannot be negative");
+        if (targetDescriptor.isPresent() && !isStandardDescriptor(targetDescriptor.getAsInt())) {
+            throw new IllegalArgumentException("Target descriptor must be 0, 1, or 2");
         }
     }
 
@@ -57,5 +57,9 @@ public record Redirection(
                 "",
                 OptionalInt.of(targetDescriptor)
         );
+    }
+
+    private static boolean isStandardDescriptor(int descriptor) {
+        return descriptor >= 0 && descriptor <= 2;
     }
 }

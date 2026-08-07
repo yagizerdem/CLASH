@@ -45,7 +45,8 @@ public class Main {
             context.cwd = cwd;
 
             SimpleCommand cmd = new SimpleCommand(List.of("tasklist"), List.of(
-                    new Redirection(0, RedirectOperator.OUTPUT, "test.txt")));
+                    new Redirection(0, RedirectOperator.OUTPUT, "test.txt"),
+                    new Redirection(0, RedirectOperator.OUTPUT, "test2.txt")));
 
             SimpleCommandExecutor executor = new SimpleCommandExecutor(cmd, context);
             ExecutionResponse response = executor.execCaptured();

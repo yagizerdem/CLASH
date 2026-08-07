@@ -29,7 +29,7 @@ public final class PathResolver {
     public Path resolve(String path) {
         Objects.requireNonNull(path, "path");
 
-        Path target = Path.of(expandHome(path));
+        Path target = Path.of(path);
 
         if (target.isAbsolute()) {
             return target.normalize();
@@ -55,7 +55,7 @@ public final class PathResolver {
 
     public boolean isAbsolute(String path) {
         Objects.requireNonNull(path, "path");
-        return Path.of(expandHome(path)).isAbsolute();
+        return Path.of(path).isAbsolute();
     }
 
     public boolean isRelative(String path) {
@@ -111,23 +111,6 @@ public final class PathResolver {
     public Path relativize(String path) {
         Path target = resolve(path);
         return basePath.relativize(target);
-    }
-
-    public String expandHome(String path) {
-        Objects.requireNonNull(path, "path");
-
-        if (path.equals("~")) {
-            return System.getProperty("user.home");
-        }
-
-        if (path.startsWith("~/") || path.startsWith("~\\")) {
-            return Path.of(
-                    System.getProperty("user.home"),
-                    path.substring(2)
-            ).toString();
-        }
-
-        return path;
     }
 
     public Path getBasePath() {

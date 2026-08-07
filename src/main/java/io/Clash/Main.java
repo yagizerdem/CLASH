@@ -2,8 +2,11 @@ package io.Clash;
 
 import io.Clash.ast.Util;
 import io.Clash.ast.base.AstNode;
+import io.Clash.ast.enums.RedirectionKind;
 import io.Clash.parser.core.BashParser;
 import io.Clash.process.jvm.SimpleCommandExecutor;
+import io.Clash.process.model.RedirectOperator;
+import io.Clash.process.model.Redirection;
 import io.Clash.process.model.SimpleCommand;
 import io.Clash.process.model.base.ExecutionResponse;
 import org.treesitter.TSNode;
@@ -41,7 +44,8 @@ public class Main {
             context.env = env;
             context.cwd = cwd;
 
-            SimpleCommand cmd = new SimpleCommand(List.of("tasklist"), List.of());
+            SimpleCommand cmd = new SimpleCommand(List.of("tasklist"), List.of(
+                    new Redirection(0, RedirectOperator.OUTPUT, "test.txt")));
 
             SimpleCommandExecutor executor = new SimpleCommandExecutor(cmd, context);
             ExecutionResponse response = executor.execCaptured();

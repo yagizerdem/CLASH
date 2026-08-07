@@ -18,3 +18,17 @@
 - `build` Commits that affect build-related components such as build tools, dependencies, project version, ...
 - `ops` Commits that affect operational aspects like infrastructure (IaC), deployment scripts, CI/CD pipelines, backups, monitoring, or recovery procedures, ...
 - `chore` Commits that represent tasks like initial commit, modifying `.gitignore`, ...
+
+
+### Commit Rules
+- Generate meaningful commit messages
+- Generate commit message based on format
+
+#### Commit message format
+``` html
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+```
